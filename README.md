@@ -30,7 +30,7 @@ Player player = api.getPlayer( allyCode );
 Request guild rosters by ally code:
 ```java
 int allyCode = 123456789;
-Player player = api.getGuild( allyCode );
+List<Player> guild = api.getGuild( allyCode );
 ```
 
 Request various other data:
