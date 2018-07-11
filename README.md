@@ -41,3 +41,6 @@ List<Event> events = api.getEvents();
 
 List<TB> territoryBattleInfo = api.getTBs();
 ```
+...and so much more!
+
+Want to receive the raw JSON and parse it yourself? Each endpoint is overloaded with a -JSON postfix that simply returns a JSON String.
