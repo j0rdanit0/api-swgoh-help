@@ -11,15 +11,11 @@ public class Event
     public int status;
     public Schedule[] schedule;
 
-    public Event(){}
-
     public class Schedule
     {
         public long start;
         public long end;
         public long show;
         public long hide;
-
-        public Schedule(){}
     }
 }

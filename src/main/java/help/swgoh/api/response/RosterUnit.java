@@ -1,6 +1,6 @@
 package help.swgoh.api.response;
 
-public class Collectible
+public class RosterUnit
 {
     public String id;
     public String name;
@@ -14,8 +14,6 @@ public class Collectible
     public Skill[] skills;
     public Crew[] crew;
     public Mod[] mods;
-
-    public Collectible(){}
 
     public class Mod
     {
@@ -35,8 +33,6 @@ public class Collectible
         public String secondaryValue_3;
         public String secondaryType_4;
         public String secondaryValue_4;
-
-        public Mod(){}
     }
 
     public class Crew
@@ -47,15 +43,11 @@ public class Collectible
         public int cp;
         public float gp;
 
-        public Crew(){}
-
         public class SkillReference
         {
             public String skillId;
             public int requiredTier;
             public int requiredRarity;
-
-            public SkillReference(){}
         }
     }
 
@@ -63,8 +55,6 @@ public class Collectible
     {
         public String equipmentId;
         public int slot;
-
-        public Equipment(){}
     }
 
     public class Skill
@@ -73,8 +63,6 @@ public class Collectible
         public String name;
         public boolean isZeta;
         public SkillType type;
-
-        public Skill(){}
     }
 
     public enum RosterType

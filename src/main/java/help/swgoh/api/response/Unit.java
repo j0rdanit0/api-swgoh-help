@@ -8,23 +8,17 @@ public class Unit
     public Crew[] crew;
     public String[] tags;
 
-    public Unit(){}
-
     public class Crew
     {
         public String unitId;
         public int slot;
         public SkillReference[] skillReferenceList;
 
-        public Crew(){}
-
         public class SkillReference
         {
             public String skillId;
             public int requiredTier;
             public int requiredRarity;
-
-            public SkillReference(){}
         }
     }
 }

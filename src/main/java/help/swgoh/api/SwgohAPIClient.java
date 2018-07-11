@@ -20,7 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
-public class SwgohAPIConnector implements SwgohAPI
+public class SwgohAPIClient implements SwgohAPI
 {
     private static final Gson GSON = new Gson();
 
@@ -113,7 +113,7 @@ public class SwgohAPIConnector implements SwgohAPI
         }
     }
 
-    public SwgohAPIConnector( SwgohAPISettings settings )
+    public SwgohAPIClient( SwgohAPISettings settings )
     {
         urlBase = String.format( "%s://%s%s", "http" + (settings.isUsesSSL() ? "s" : ""), settings.getHost(), settings.getPort() );
         loginCredentials = "username=" + settings.getUsername() +
@@ -220,15 +220,27 @@ public class SwgohAPIConnector implements SwgohAPI
     }
 
     @Override
-    public List<TB> getTB() throws IOException
+    public List<TB> getTBs() throws IOException
     {
-        return getTB( null );
+        return getTBs( null );
     }
 
     @Override
-    public List<TB> getTB( Language language ) throws IOException
+    public List<TB> getTBs( Language language ) throws IOException
     {
         return fetchData( DataCriteria.TB, language, new TypeToken<List<TB>>(){}.getType() );
+    }
+
+    @Override
+    public String getTBsJSON() throws IOException
+    {
+        return getTBsJSON( null );
+    }
+
+    @Override
+    public String getTBsJSON( Language language ) throws IOException
+    {
+        return fetchData( DataCriteria.TB, language );
     }
 
     private void login()

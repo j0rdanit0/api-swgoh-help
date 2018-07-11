@@ -5,7 +5,7 @@ package help.swgoh.api;
  * to create an instance of the {@link SwgohAPI} interface.
  *
  * If you would rather do this yourself, simply create a new {@link SwgohAPISettings} object and pass it into the
- * constructor of a new {@link SwgohAPIConnector} object.
+ * constructor of a new {@link SwgohAPIClient} object.
  *
  * @since 1.0.0
  */
@@ -17,7 +17,7 @@ public class SwgohAPIBuilder
      * Defines the username to be sent with the login request.
      *
      * @param username  The username to be sent with the login request
-     * @return this
+     * @return The builder instance.
      */
     public SwgohAPIBuilder withUsername( String username )
     {
@@ -29,7 +29,7 @@ public class SwgohAPIBuilder
      * Defines the password to be sent with the login request.
      *
      * @param password  The password to be sent with the login request
-     * @return this
+     * @return The builder instance.
      */
     public SwgohAPIBuilder withPassword( String password )
     {
@@ -41,7 +41,7 @@ public class SwgohAPIBuilder
      * Defines the client ID to be sent with the login request.
      *
      * @param clientId  The client ID to be sent with the login request
-     * @return this
+     * @return The builder instance.
      */
     public SwgohAPIBuilder withClientId( String clientId )
     {
@@ -53,7 +53,7 @@ public class SwgohAPIBuilder
      * Defines the client secret to be sent with the login request.
      *
      * @param clientSecret  The client secret to be sent with the login request
-     * @return this
+     * @return The builder instance.
      */
     public SwgohAPIBuilder withClientSecret( String clientSecret )
     {
@@ -69,7 +69,7 @@ public class SwgohAPIBuilder
      * There is a default value defined in {@link SwgohAPISettings#usesSSL}
      *
      * @param usesSSL  The flag to turn http into https or not.
-     * @return this
+     * @return The builder instance.
      */
     public SwgohAPIBuilder withSSL( boolean usesSSL )
     {
@@ -83,7 +83,7 @@ public class SwgohAPIBuilder
      * There is a default value defined in {@link SwgohAPISettings#host}
      *
      * @param host  The domain part of the URL.
-     * @return this
+     * @return The builder instance.
      */
     public SwgohAPIBuilder withHost( String host )
     {
@@ -99,7 +99,7 @@ public class SwgohAPIBuilder
      * There is a default value defined in {@link SwgohAPISettings#port}
      *
      * @param port  The non-negative port.
-     * @return this
+     * @return The builder instance.
      */
     public SwgohAPIBuilder withPort( int port )
     {
@@ -108,15 +108,15 @@ public class SwgohAPIBuilder
     }
 
     /**
-     * Validate the {@link SwgohAPISettings} object and construct a new {@link SwgohAPIConnector} instance with it.
+     * Validate the {@link SwgohAPISettings} object and construct a new {@link SwgohAPIClient} instance with it.
      *
-     * @return {@link SwgohAPIConnector}
+     * @return The new client with the configuration specified by this builder.
      * @throws SwgohAPIException if the validation of the settings object fails.
      * @see SwgohAPISettings#validate()
      */
     public SwgohAPI build()
     {
         settings.validate();
-        return new SwgohAPIConnector( settings );
+        return new SwgohAPIClient( settings );
     }
 }
