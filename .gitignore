@@ -1,0 +1,5 @@
+*.idea
+*.iml
+*.releaseBackup
+release.properties
+/src/test/java/*
