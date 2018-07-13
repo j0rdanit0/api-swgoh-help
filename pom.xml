@@ -9,7 +9,7 @@
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>A collection of Java helper classes that allow for easy and immediate access to the api.swgoh.help endpoints.</description>
-    <url>https://github.com/r3volved/api-swgoh-help</url>
+    <url>https://github.com/j0rdanit0/api-swgoh-help</url>
 
     <inceptionYear>2018</inceptionYear>
 
@@ -30,9 +30,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/r3volved/api-swgoh-help.git</connection>
-        <developerConnection>scm:git:git@github.com:r3volved/api-swgoh-help.git</developerConnection>
-        <url>https://github.com/r3volved/api-swgoh-help</url>
+        <connection>scm:git:git://github.com/j0rdanit0/api-swgoh-help.git</connection>
+        <developerConnection>scm:git:git@github.com:j0rdanit0/api-swgoh-help.git</developerConnection>
+        <url>https://github.com/j0rdanit0/api-swgoh-help</url>
         <tag>1.0.0</tag>
     </scm>
 
@@ -49,7 +49,7 @@
 
     <issueManagement>
         <system>Github</system>
-        <url>https://github.com/r3volved/api-swgoh-help/issues</url>
+        <url>https://github.com/j0rdanit0/api-swgoh-help/issues</url>
     </issueManagement>
 
     <build>
