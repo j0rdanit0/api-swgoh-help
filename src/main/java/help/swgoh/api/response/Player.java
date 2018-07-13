@@ -17,7 +17,7 @@ public class Player
 
     public class Arena
     {
-        public @SerializedName( "char" ) SubArena character;
+        public @SerializedName( value = "char", alternate = "character" ) SubArena character;
         public SubArena ship;
 
         public class SubArena
@@ -29,7 +29,7 @@ public class Player
             {
                 public String id;
                 public String name;
-                public String type;
+                public ArenaSquadMemberType type;
             }
         }
     }

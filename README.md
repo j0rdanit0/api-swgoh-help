@@ -33,14 +33,15 @@ int allyCode = 123456789;
 List<Player> guild = api.getGuild( allyCode );
 ```
 
-Request various other data:
+Request various other kinds of data:
 ```java
 Map<String,Unit> units = api.getUnits();
-
 List<Event> events = api.getEvents();
-
 List<TB> territoryBattleInfo = api.getTBs();
 ```
 ...and so much more!
 
 Want to receive the raw JSON and parse it yourself? Each endpoint is overloaded with a -JSON postfix that simply returns a JSON String.
+
+#Other Language Clients
+SwgohHelp.js (Javascript): https://github.com/r3volved/api-swgoh-help

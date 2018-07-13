@@ -2,11 +2,7 @@ package help.swgoh.api;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import help.swgoh.api.response.Event;
-import help.swgoh.api.response.Player;
-import help.swgoh.api.response.TB;
-import help.swgoh.api.response.Token;
-import help.swgoh.api.response.Unit;
+import help.swgoh.api.response.*;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -31,36 +27,29 @@ public class SwgohAPIClient implements SwgohAPI
 
     public enum Language
     {
-        English( "eng", "ENG_US", "English" ),
-        ChineseSimplified( "chi_sim", "CHS_CN", "Chinese" ),
-        ChineseTraditional( "chi_tra", "CHT_CN", "Traditional Chinese" ),
-        French( "fra", "FRE_FR", "French" ),
-        German( "deu", "GER_DE", "German" ),
-        Indonesian( "ind", "IND_ID", "Indonesian" ),
-        Italian( "ita", "ITA_IT", "Italian" ),
-        Japanese( "jpn", "JPN_JP", "Japanese" ),
-        Korean( "kor", "KOR_KR", "Korean" ),
-        Portuguese( "por", "POR_BR", "Portuguese" ),
-        Russian( "rus", "RUS_RU", "Russian" ),
-        Spanish( "spa", "SPA_XM", "Spanish" ),
-        Thai( "tha", "THA_TH", "Thai" ),
-        Turkish( "tur", "TUR_TR", "Turkish" ),
+        English( "ENG_US", "English" ),
+        ChineseSimplified( "CHS_CN", "Chinese" ),
+        ChineseTraditional( "CHT_CN", "Traditional Chinese" ),
+        French( "FRE_FR", "French" ),
+        German( "GER_DE", "German" ),
+        Indonesian( "IND_ID", "Indonesian" ),
+        Italian( "ITA_IT", "Italian" ),
+        Japanese( "JPN_JP", "Japanese" ),
+        Korean( "KOR_KR", "Korean" ),
+        Portuguese( "POR_BR", "Portuguese" ),
+        Russian( "RUS_RU", "Russian" ),
+        Spanish( "SPA_XM", "Spanish" ),
+        Thai( "THA_TH", "Thai" ),
+        Turkish( "TUR_TR", "Turkish" ),
         ;
 
-        private final String tesseractCode;
         private final String displayName;
         private final String swgohCode;
 
-        Language( String tesseractCode, String swgohCode, String displayName )
+        Language( String swgohCode, String displayName )
         {
-            this.tesseractCode = tesseractCode;
             this.swgohCode = swgohCode;
             this.displayName = displayName;
-        }
-
-        public String getTesseractCode()
-        {
-            return tesseractCode;
         }
 
         public String getDisplayName()
@@ -220,6 +209,150 @@ public class SwgohAPIClient implements SwgohAPI
     }
 
     @Override
+    public List<ArenaSquadMemberType> getArenaSquadMemberTypes() throws IOException
+    {
+        return getArenaSquadMemberTypes( null );
+    }
+
+    @Override
+    public List<ArenaSquadMemberType> getArenaSquadMemberTypes( Language language ) throws IOException
+    {
+        return fetchData( DataCriteria.ARENA, language, new TypeToken<List<ArenaSquadMemberType>>(){}.getType() );
+    }
+
+    @Override
+    public String getArenaSquadMemberTypesJSON() throws IOException
+    {
+        return getArenaSquadMemberTypesJSON( null );
+    }
+
+    @Override
+    public String getArenaSquadMemberTypesJSON( Language language ) throws IOException
+    {
+        return fetchData( DataCriteria.ARENA, language );
+    }
+
+    @Override
+    public Map<String, Gear> getGear() throws IOException
+    {
+        return getGear( null );
+    }
+
+    @Override
+    public Map<String, Gear> getGear( Language language ) throws IOException
+    {
+        return fetchData( DataCriteria.GEAR, language, new TypeToken<Map<String, Gear>>(){}.getType() );
+    }
+
+    @Override
+    public String getGearJSON() throws IOException
+    {
+        return getGearJSON( null );
+    }
+
+    @Override
+    public String getGearJSON( Language language ) throws IOException
+    {
+        return fetchData( DataCriteria.GEAR, language );
+    }
+
+    @Override
+    public List<ModSet> getModSets() throws IOException
+    {
+        return getModSets( null );
+    }
+
+    @Override
+    public List<ModSet> getModSets( Language language ) throws IOException
+    {
+        return fetchData( DataCriteria.MOD_SETS, language, new TypeToken<List<ModSet>>(){}.getType() );
+    }
+
+    @Override
+    public String getModSetsJSON() throws IOException
+    {
+        return getModSetsJSON( null );
+    }
+
+    @Override
+    public String getModSetsJSON( Language language ) throws IOException
+    {
+        return fetchData( DataCriteria.MOD_SETS, language );
+    }
+
+    @Override
+    public List<String> getModStatFields() throws IOException
+    {
+        return getModStatFields( null );
+    }
+
+    @Override
+    public List<String> getModStatFields( Language language ) throws IOException
+    {
+        return fetchData( DataCriteria.MOD_STATS, language, new TypeToken<List<String>>(){}.getType() );
+    }
+
+    @Override
+    public String getModStatFieldsJSON() throws IOException
+    {
+        return getModStatFieldsJSON( null );
+    }
+
+    @Override
+    public String getModStatFieldsJSON( Language language ) throws IOException
+    {
+        return fetchData( DataCriteria.MOD_STATS, language );
+    }
+
+    @Override
+    public Map<String, BaseSkill> getSkills() throws IOException
+    {
+        return getSkills( null );
+    }
+
+    @Override
+    public Map<String, BaseSkill> getSkills( Language language ) throws IOException
+    {
+        return fetchData( DataCriteria.SKILLS, language, new TypeToken<Map<String, BaseSkill>>(){}.getType() );
+    }
+
+    @Override
+    public String getSkillsJSON() throws IOException
+    {
+        return getSkillsJSON( null );
+    }
+
+    @Override
+    public String getSkillsJSON( Language language ) throws IOException
+    {
+        return fetchData( DataCriteria.SKILLS, language );
+    }
+
+    @Override
+    public Map<String, BaseSkill.Type> getSkillTypes() throws IOException
+    {
+        return getSkillTypes( null );
+    }
+
+    @Override
+    public Map<String, BaseSkill.Type> getSkillTypes( Language language ) throws IOException
+    {
+        return fetchData( DataCriteria.SKILL_TYPES, language, new TypeToken<Map<String, BaseSkill.Type>>(){}.getType() );
+    }
+
+    @Override
+    public String getSkillTypesJSON() throws IOException
+    {
+        return getSkillTypesJSON( null );
+    }
+
+    @Override
+    public String getSkillTypesJSON( Language language ) throws IOException
+    {
+        return fetchData( DataCriteria.SKILL_TYPES, language );
+    }
+
+    @Override
     public List<TB> getTBs() throws IOException
     {
         return getTBs( null );
@@ -241,6 +374,78 @@ public class SwgohAPIClient implements SwgohAPI
     public String getTBsJSON( Language language ) throws IOException
     {
         return fetchData( DataCriteria.TB, language );
+    }
+
+    @Override
+    public Map<String, Zeta> getZetas() throws IOException
+    {
+        return getZetas( null );
+    }
+
+    @Override
+    public Map<String, Zeta> getZetas( Language language ) throws IOException
+    {
+        return fetchData( DataCriteria.ZETAS, language, new TypeToken<Map<String, Zeta>>(){}.getType() );
+    }
+
+    @Override
+    public String getZetasJSON() throws IOException
+    {
+        return getZetasJSON( null );
+    }
+
+    @Override
+    public String getZetasJSON( Language language ) throws IOException
+    {
+        return fetchData( DataCriteria.ZETAS, language );
+    }
+
+    @Override
+    public List<Zeta> getZetasWithUnit() throws IOException
+    {
+        return getZetasWithUnit( null );
+    }
+
+    @Override
+    public List<Zeta> getZetasWithUnit( Language language ) throws IOException
+    {
+        return fetchData( DataCriteria.ZETA_ABILITIES, language, new TypeToken<List<Zeta>>(){}.getType() );
+    }
+
+    @Override
+    public String getZetasWithUnitJSON() throws IOException
+    {
+        return getZetasWithUnitJSON( null );
+    }
+
+    @Override
+    public String getZetasWithUnitJSON( Language language ) throws IOException
+    {
+        return fetchData( DataCriteria.ZETA_ABILITIES, language );
+    }
+
+    @Override
+    public List<Battle> getBattles() throws IOException
+    {
+        return getBattles( null );
+    }
+
+    @Override
+    public List<Battle> getBattles( Language language ) throws IOException
+    {
+        return fetchData( DataCriteria.BATTLES, language, new TypeToken<List<Battle>>(){}.getType() );
+    }
+
+    @Override
+    public String getBattlesJSON() throws IOException
+    {
+        return getBattlesJSON( null );
+    }
+
+    @Override
+    public String getBattlesJSON( Language language ) throws IOException
+    {
+        return fetchData( DataCriteria.BATTLES, language );
     }
 
     private void login()

@@ -57,22 +57,15 @@ public class RosterUnit
         public int slot;
     }
 
-    public class Skill
+    public class Skill extends BaseSkill
     {
         public int tier;
-        public String name;
-        public boolean isZeta;
-        public SkillType type;
+        public Type type;
     }
 
     public enum RosterType
     {
         Char, Ship
-    }
-
-    public enum SkillType
-    {
-        Basic, Contract, Hardware, Leader, Special, Unique
     }
 
     public enum ModSlot
