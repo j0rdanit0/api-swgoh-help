@@ -52,5 +52,34 @@ List<TB> territoryBattleInfo = api.getTBs();
 
 Want to receive the raw JSON and parse it yourself? Each endpoint is overloaded with a -JSON postfix that simply returns a JSON String.
 
+# Spring Integration
+If you'd like to see this work with [Spring's dependency injection magic](https://docs.spring.io/spring/docs/current/spring-framework-reference/core.html#spring-core), simply write something similar to the following code:
+```java
+@Configuration
+public class SwgohConfiguration
+{
+    @Bean
+    public SwgohAPI swgohApi()
+    {
+        return new SwgohAPIBuilder()
+                .withUsername( "username" )
+                .withPassword( "password" )
+                .withClientId( "clientId" )
+                .withClientSecret( "clientSecret" )
+                .build();
+    }
+}
+```
+
+And it's as simple as that. Now you can Autowire the API client to your heart's content.
+```java
+@Service
+public class SwgohService
+{
+    @Autowired
+    private SwgohAPI swgohApi;
+}
+```
+
 # Other Language Clients
 SwgohHelp.js (Javascript): https://github.com/r3volved/api-swgoh-help
