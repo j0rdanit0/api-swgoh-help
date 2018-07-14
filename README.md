@@ -4,18 +4,20 @@ Java client wrapper for the API at https://api.swgoh.help
 # Usage
 Include the swgoh-api-connector artifact:
 
+`@VERSION@` should be replaced with the version you want to use.
+
 ### Maven
 ```xml
 <dependency>
     <groupId>help.swgoh.api</groupId>
     <artifactId>swgoh-api-connector</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>@VERSION@</version>
 </dependency>
 ```
 
 ### Gradle
 ```groovy
-compile 'help.swgoh.api:swgoh-api-connector:1.0.0'
+compile 'help.swgoh.api:swgoh-api-connector:@VERSION@'
 ```
 
 In code, use the SwgohAPIBuilder to initialize a new instance of the client:
