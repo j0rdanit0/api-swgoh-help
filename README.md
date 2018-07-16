@@ -1,4 +1,4 @@
-# api-swgoh-help [![Maven Central](https://img.shields.io/maven-central/v/help.swgoh.api/swgoh-api-connector.svg?style=flat-square)](https://mvnrepository.com/artifact/help.swgoh.api/swgoh-api-connector) [![Build Status](https://img.shields.io/circleci/project/github/Discord4J/Discord4J/master.svg?style=flat-square)](https://circleci.com/gh/j0rdanit0/api-swgoh-help/tree/master)
+# api-swgoh-help [![Maven Central](https://img.shields.io/maven-central/v/help.swgoh.api/swgoh-api-connector.svg?style=flat-square)](https://mvnrepository.com/artifact/help.swgoh.api/swgoh-api-connector)
 Java client wrapper for the API at https://api.swgoh.help
 
 # Usage
