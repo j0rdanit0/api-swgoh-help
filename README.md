@@ -83,4 +83,5 @@ public class SwgohService
 
 # Available Language Clients
 JavaScript: https://github.com/r3volved/api-swgoh-help
+
 Java: https://github.com/j0rdanit0/api-swgoh-help
