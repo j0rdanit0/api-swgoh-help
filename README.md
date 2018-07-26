@@ -86,4 +86,4 @@ JavaScript: https://github.com/r3volved/api-swgoh-help
 
 Java: https://github.com/j0rdanit0/api-swgoh-help
 
-C#: : https://github.com/SdtBarbarossa/SWGOH-Help-Api-C-Sharp
+C#: https://github.com/SdtBarbarossa/SWGOH-Help-Api-C-Sharp
