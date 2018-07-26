@@ -77,9 +77,16 @@ public class SwgohAPIClient implements SwgohAPI
     public enum API
     {
         signin( "/auth/signin" ),
-        data( "/swgoh/data/" ),
-        player( "/swgoh/player/" ),
-        guild( "/swgoh/guild/" ),
+        data( "/swgoh/data/%s" ),
+        player( "/swgoh/player/%s" ),
+        playerGG( "/swgoh/player/%s/gg" ),
+        playerMods( "/swgoh/player/%s/mods" ),
+        playerZetas( "/swgoh/player/%s/zetas" ),
+        guild( "/swgoh/guild/%s" ),
+        guildGG( "/swgoh/guild/%s/gg" ),
+        guildDetails( "/swgoh/guild/%s/details" ),
+        guildRoster( "/swgoh/guild/%s/roster" ),
+        stats( "/swgoh/stats" ),
         ;
 
         private final String path;
@@ -93,7 +100,7 @@ public class SwgohAPIClient implements SwgohAPI
         {
             String lang = language != null ? "/"+language.getSwgohCode() : "";
             String criteria = dataCriteria != null ? dataCriteria : "";
-            return urlBase + path + criteria + lang;
+            return urlBase + String.format( path, criteria ) + lang;
         }
 
         public URL getUrl( String urlBase, String criteria, Language language ) throws MalformedURLException
@@ -137,15 +144,69 @@ public class SwgohAPIClient implements SwgohAPI
     }
 
     @Override
-    public List<Player> getGuild( int allyCode ) throws IOException
+    public String getPlayerGGJSON( int allyCode ) throws IOException
+    {
+        return callApi( API.playerGG.getUrl( urlBase, allyCode+"", null ) );
+    }
+
+    @Override
+    public PlayerMods getPlayerMods( int allyCode ) throws IOException
+    {
+        return getPlayerMods( allyCode, null );
+    }
+
+    @Override
+    public PlayerMods getPlayerMods( int allyCode, Language language ) throws IOException
+    {
+        return callApi( API.playerMods.getUrl( urlBase, allyCode+"", language ), PlayerMods.class );
+    }
+
+    @Override
+    public String getPlayerModsJSON( int allyCode ) throws IOException
+    {
+        return getPlayerModsJSON( allyCode, null );
+    }
+
+    @Override
+    public String getPlayerModsJSON( int allyCode, Language language ) throws IOException
+    {
+        return callApi( API.playerMods.getUrl( urlBase, allyCode+"", language ) );
+    }
+
+    @Override
+    public PlayerZetas getPlayerZetas( int allyCode ) throws IOException
+    {
+        return getPlayerZetas( allyCode, null );
+    }
+
+    @Override
+    public PlayerZetas getPlayerZetas( int allyCode, Language language ) throws IOException
+    {
+        return callApi( API.playerZetas.getUrl( urlBase, allyCode+"", language ), PlayerZetas.class );
+    }
+
+    @Override
+    public String getPlayerZetasJSON( int allyCode ) throws IOException
+    {
+        return getPlayerZetasJSON( allyCode, null );
+    }
+
+    @Override
+    public String getPlayerZetasJSON( int allyCode, Language language ) throws IOException
+    {
+        return callApi( API.playerZetas.getUrl( urlBase, allyCode+"", language ) );
+    }
+
+    @Override
+    public Guild getGuild( int allyCode ) throws IOException
     {
         return getGuild( allyCode, null );
     }
 
     @Override
-    public List<Player> getGuild( int allyCode, Language language ) throws IOException
+    public Guild getGuild( int allyCode, Language language ) throws IOException
     {
-        return callApi( API.guild.getUrl( urlBase, allyCode+"", language ), new TypeToken<List<Player>>(){}.getType() );
+        return callApi( API.guild.getUrl( urlBase, allyCode+"", language ), Guild.class );
     }
 
     @Override
@@ -158,6 +219,60 @@ public class SwgohAPIClient implements SwgohAPI
     public String getGuildJSON( int allyCode, Language language ) throws IOException
     {
         return callApi( API.guild.getUrl( urlBase, allyCode+"", language ) );
+    }
+
+    @Override
+    public String getGuildGGJSON( int allyCode ) throws IOException
+    {
+        return callApi( API.guildGG.getUrl( urlBase, allyCode+"", null ) );
+    }
+
+    @Override
+    public Guild getGuildDetails( int allyCode ) throws IOException
+    {
+        return getGuildDetails( allyCode, null );
+    }
+
+    @Override
+    public Guild getGuildDetails( int allyCode, Language language ) throws IOException
+    {
+        return callApi( API.guildDetails.getUrl( urlBase, allyCode+"", language ), Guild.class );
+    }
+
+    @Override
+    public String getGuildDetailsJSON( int allyCode ) throws IOException
+    {
+        return this.getGuildDetailsJSON( allyCode, null );
+    }
+
+    @Override
+    public String getGuildDetailsJSON( int allyCode, Language language ) throws IOException
+    {
+        return callApi( API.guildDetails.getUrl( urlBase, allyCode+"", language ) );
+    }
+
+    @Override
+    public List<Player> getGuildRoster( int allyCode ) throws IOException
+    {
+        return getGuildRoster( allyCode, null );
+    }
+
+    @Override
+    public List<Player> getGuildRoster( int allyCode, Language language ) throws IOException
+    {
+        return callApi( API.guildRoster.getUrl( urlBase, allyCode+"", language ), new TypeToken<List<Player>>(){}.getType() );
+    }
+
+    @Override
+    public String getGuildRosterJSON( int allyCode ) throws IOException
+    {
+        return getGuildRosterJSON( allyCode, null );
+    }
+
+    @Override
+    public String getGuildRosterJSON( int allyCode, Language language ) throws IOException
+    {
+        return callApi( API.guildRoster.getUrl( urlBase, allyCode+"", language ) );
     }
 
     @Override
@@ -329,15 +444,15 @@ public class SwgohAPIClient implements SwgohAPI
     }
 
     @Override
-    public Map<String, BaseSkill.Type> getSkillTypes() throws IOException
+    public Map<String, SkillType> getSkillTypes() throws IOException
     {
         return getSkillTypes( null );
     }
 
     @Override
-    public Map<String, BaseSkill.Type> getSkillTypes( Language language ) throws IOException
+    public Map<String, SkillType> getSkillTypes( Language language ) throws IOException
     {
-        return fetchData( DataCriteria.SKILL_TYPES, language, new TypeToken<Map<String, BaseSkill.Type>>(){}.getType() );
+        return fetchData( DataCriteria.SKILL_TYPES, language, new TypeToken<Map<String, SkillType>>(){}.getType() );
     }
 
     @Override
@@ -422,6 +537,30 @@ public class SwgohAPIClient implements SwgohAPI
     public String getZetasWithUnitJSON( Language language ) throws IOException
     {
         return fetchData( DataCriteria.ZETA_ABILITIES, language );
+    }
+
+    @Override
+    public ZetaRecommendations getZetaRecommendations() throws IOException
+    {
+        return getZetaRecommendations( null );
+    }
+
+    @Override
+    public ZetaRecommendations getZetaRecommendations( Language language ) throws IOException
+    {
+        return fetchData( DataCriteria.ZETA_RECOMMENDATIONS, language, ZetaRecommendations.class );
+    }
+
+    @Override
+    public String getZetaRecommendationsJSON() throws IOException
+    {
+        return getZetaRecommendationsJSON( null );
+    }
+
+    @Override
+    public String getZetaRecommendationsJSON( Language language ) throws IOException
+    {
+        return fetchData( DataCriteria.ZETA_RECOMMENDATIONS, null );
     }
 
     @Override
