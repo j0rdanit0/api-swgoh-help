@@ -13,6 +13,44 @@ import java.util.Map;
  */
 public interface SwgohAPI
 {
+    enum Language
+    {
+        English( "eng_us", "English" ),
+        ChineseSimplified( "chs_cn", "Chinese" ),
+        ChineseTraditional( "cht_cn", "Traditional Chinese" ),
+        French( "fre_fr", "French" ),
+        German( "ger_de", "German" ),
+        Indonesian( "ind_id", "Indonesian" ),
+        Italian( "ita_it", "Italian" ),
+        Japanese( "jpn_jp", "Japanese" ),
+        Korean( "kor_kr", "Korean" ),
+        Portuguese( "por_br", "Portuguese" ),
+        Russian( "rus_ru", "Russian" ),
+        Spanish( "spa_xm", "Spanish" ),
+        Thai( "tha_th", "Thai" ),
+        Turkish( "tur_tr", "Turkish" ),
+        ;
+
+        private final String displayName;
+        private final String swgohCode;
+
+        Language( String swgohCode, String displayName )
+        {
+            this.swgohCode = swgohCode;
+            this.displayName = displayName;
+        }
+
+        public String getDisplayName()
+        {
+            return displayName;
+        }
+
+        public String getSwgohCode()
+        {
+            return swgohCode;
+        }
+    }
+    
     /**
      * Makes an http connection to the swgoh.help API for a player object in the default language.
      *
@@ -21,26 +59,26 @@ public interface SwgohAPI
      * @param allyCode  The number that uniquely identifies a player, found in the player's game profile.
      * @return The player, specified by the allyCode.
      * @throws IOException if http connection fails.
-     * @see #getPlayer(int, SwgohAPIClient.Language)
+     * @see #getPlayer(int, Language)
      * @see #getPlayerJSON(int)
-     * @see #getPlayerJSON(int, SwgohAPIClient.Language)
+     * @see #getPlayerJSON(int, Language)
      */
     Player getPlayer( int allyCode ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a player object in the specified language.
      *
-     * For pulling all the members of a guild, use {@link #getGuildRoster(int, SwgohAPIClient.Language)}
+     * For pulling all the members of a guild, use {@link #getGuildRoster(int, Language)}
      *
      * @param allyCode  The number that uniquely identifies a player, found in the player's game profile.
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return The player, specified by the allyCode.
      * @throws IOException if http connection fails.
      * @see #getPlayer(int)
      * @see #getPlayerJSON(int)
-     * @see #getPlayerJSON(int, SwgohAPIClient.Language)
+     * @see #getPlayerJSON(int, Language)
      */
-    Player getPlayer( int allyCode, SwgohAPIClient.Language language ) throws IOException;
+    Player getPlayer( int allyCode, Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a player JSON in the default language.
@@ -51,25 +89,25 @@ public interface SwgohAPI
      * @return JSON string of the player, specified by the allyCode.
      * @throws IOException if http connection fails.
      * @see #getPlayer(int)
-     * @see #getPlayer(int, SwgohAPIClient.Language)
-     * @see #getPlayerJSON(int, SwgohAPIClient.Language)
+     * @see #getPlayer(int, Language)
+     * @see #getPlayerJSON(int, Language)
      */
     String getPlayerJSON( int allyCode ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a player JSON in the specified language.
      *
-     * For pulling all the members of a guild, use {@link #getGuildRosterJSON(int, SwgohAPIClient.Language)}
+     * For pulling all the members of a guild, use {@link #getGuildRosterJSON(int, Language)}
      *
      * @param allyCode  The number that uniquely identifies a player, found in the player's game profile.
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return JSON string of the player, specified by the allyCode.
      * @throws IOException if http connection fails.
      * @see #getPlayer(int)
-     * @see #getPlayer(int, SwgohAPIClient.Language)
+     * @see #getPlayer(int, Language)
      * @see #getPlayerJSON(int)
      */
-    String getPlayerJSON( int allyCode, SwgohAPIClient.Language language ) throws IOException;
+    String getPlayerJSON( int allyCode, Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a JSON string of a player roster formatted like the swgoh.gg
@@ -89,9 +127,9 @@ public interface SwgohAPI
      * @param allyCode  The number that uniquely identifies a player, found in the player's game profile.
      * @return The player's mods, specified by the allyCode.
      * @throws IOException if http connection fails.
-     * @see #getPlayerMods(int, SwgohAPIClient.Language)
+     * @see #getPlayerMods(int, Language)
      * @see #getPlayerModsJSON(int)
-     * @see #getPlayerModsJSON(int, SwgohAPIClient.Language)
+     * @see #getPlayerModsJSON(int, Language)
      */
     PlayerMods getPlayerMods( int allyCode ) throws IOException;
 
@@ -99,14 +137,14 @@ public interface SwgohAPI
      * Makes an http connection to the swgoh.help API for a list of player mods in the specified language.
      *
      * @param allyCode  The number that uniquely identifies a player, found in the player's game profile.
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return The player's mods, specified by the allyCode.
      * @throws IOException if http connection fails.
      * @see #getPlayerMods(int)
      * @see #getPlayerModsJSON(int)
-     * @see #getPlayerModsJSON(int, SwgohAPIClient.Language)
+     * @see #getPlayerModsJSON(int, Language)
      */
-    PlayerMods getPlayerMods( int allyCode, SwgohAPIClient.Language language ) throws IOException;
+    PlayerMods getPlayerMods( int allyCode, Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a JSON string of a list of player mods in the default
@@ -116,8 +154,8 @@ public interface SwgohAPI
      * @return The player's mods, specified by the allyCode.
      * @throws IOException if http connection fails.
      * @see #getPlayerMods(int)
-     * @see #getPlayerMods(int, SwgohAPIClient.Language)
-     * @see #getPlayerModsJSON(int, SwgohAPIClient.Language)
+     * @see #getPlayerMods(int, Language)
+     * @see #getPlayerModsJSON(int, Language)
      */
     String getPlayerModsJSON( int allyCode ) throws IOException;
 
@@ -126,14 +164,14 @@ public interface SwgohAPI
      * language.
      *
      * @param allyCode  The number that uniquely identifies a player, found in the player's game profile.
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return The player's mods, specified by the allyCode.
      * @throws IOException if http connection fails.
      * @see #getPlayerMods(int)
-     * @see #getPlayerMods(int, SwgohAPIClient.Language)
+     * @see #getPlayerMods(int, Language)
      * @see #getPlayerModsJSON(int)
      */
-    String getPlayerModsJSON( int allyCode, SwgohAPIClient.Language language ) throws IOException;
+    String getPlayerModsJSON( int allyCode, Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a list of player zetas in the default language.
@@ -141,9 +179,9 @@ public interface SwgohAPI
      * @param allyCode  The number that uniquely identifies a player, found in the player's game profile.
      * @return The player's zetas, specified by the allyCode.
      * @throws IOException if http connection fails.
-     * @see #getPlayerZetas(int, SwgohAPIClient.Language)
+     * @see #getPlayerZetas(int, Language)
      * @see #getPlayerZetasJSON(int)
-     * @see #getPlayerZetasJSON(int, SwgohAPIClient.Language)
+     * @see #getPlayerZetasJSON(int, Language)
      */
     PlayerZetas getPlayerZetas( int allyCode ) throws IOException;
 
@@ -151,14 +189,14 @@ public interface SwgohAPI
      * Makes an http connection to the swgoh.help API for a list of player zetas in the specified language.
      *
      * @param allyCode  The number that uniquely identifies a player, found in the player's game profile.
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return The player's zetas, specified by the allyCode.
      * @throws IOException if http connection fails.
      * @see #getPlayerZetas(int)
      * @see #getPlayerZetasJSON(int)
-     * @see #getPlayerZetasJSON(int, SwgohAPIClient.Language)
+     * @see #getPlayerZetasJSON(int, Language)
      */
-    PlayerZetas getPlayerZetas( int allyCode, SwgohAPIClient.Language language ) throws IOException;
+    PlayerZetas getPlayerZetas( int allyCode, Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a JSON string of a list of player zetas in the default
@@ -168,8 +206,8 @@ public interface SwgohAPI
      * @return The player's zetas, specified by the allyCode.
      * @throws IOException if http connection fails.
      * @see #getPlayerZetas(int)
-     * @see #getPlayerZetas(int, SwgohAPIClient.Language)
-     * @see #getPlayerZetasJSON(int, SwgohAPIClient.Language)
+     * @see #getPlayerZetas(int, Language)
+     * @see #getPlayerZetasJSON(int, Language)
      */
     String getPlayerZetasJSON( int allyCode ) throws IOException;
 
@@ -178,14 +216,14 @@ public interface SwgohAPI
      * language.
      *
      * @param allyCode  The number that uniquely identifies a player, found in the player's game profile.
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return The player's zetas, specified by the allyCode.
      * @throws IOException if http connection fails.
      * @see #getPlayerZetas(int)
-     * @see #getPlayerZetas(int, SwgohAPIClient.Language)
+     * @see #getPlayerZetas(int, Language)
      * @see #getPlayerZetasJSON(int)
      */
-    String getPlayerZetasJSON( int allyCode, SwgohAPIClient.Language language ) throws IOException;
+    String getPlayerZetasJSON( int allyCode, Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a full guild object in the default language.
@@ -193,9 +231,9 @@ public interface SwgohAPI
      * @param allyCode  The number that uniquely identifies a player, found in the player's game profile.
      * @return The full guild object, specified by the allyCode.
      * @throws IOException if http connection fails.
-     * @see #getGuild(int, SwgohAPIClient.Language)
+     * @see #getGuild(int, Language)
      * @see #getGuildJSON(int)
-     * @see #getGuildJSON(int, SwgohAPIClient.Language)
+     * @see #getGuildJSON(int, Language)
      */
     Guild getGuild( int allyCode ) throws IOException;
 
@@ -203,14 +241,14 @@ public interface SwgohAPI
      * Makes an http connection to the swgoh.help API for a full guild object in the specified language.
      *
      * @param allyCode  The number that uniquely identifies a player, found in the player's game profile.
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return The full guild object, specified by the allyCode.
      * @throws IOException if http connection fails.
      * @see #getGuild(int)
      * @see #getGuildJSON(int)
-     * @see #getGuildJSON(int, SwgohAPIClient.Language)
+     * @see #getGuildJSON(int, Language)
      */
-    Guild getGuild( int allyCode, SwgohAPIClient.Language language ) throws IOException;
+    Guild getGuild( int allyCode, Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a JSON string of a full guild object in the default language.
@@ -219,8 +257,8 @@ public interface SwgohAPI
      * @return The full guild object, specified by the allyCode.
      * @throws IOException if http connection fails.
      * @see #getGuild(int)
-     * @see #getGuild(int, SwgohAPIClient.Language)
-     * @see #getGuildJSON(int, SwgohAPIClient.Language)
+     * @see #getGuild(int, Language)
+     * @see #getGuildJSON(int, Language)
      */
     String getGuildJSON( int allyCode ) throws IOException;
 
@@ -229,14 +267,14 @@ public interface SwgohAPI
      * language.
      *
      * @param allyCode  The number that uniquely identifies a player, found in the player's game profile.
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return The full guild object, specified by the allyCode.
      * @throws IOException if http connection fails.
      * @see #getGuild(int)
-     * @see #getGuild(int, SwgohAPIClient.Language)
+     * @see #getGuild(int, Language)
      * @see #getGuildJSON(int)
      */
-    String getGuildJSON( int allyCode, SwgohAPIClient.Language language ) throws IOException;
+    String getGuildJSON( int allyCode, Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a JSON formatted response similar to the swgoh.gg guild /units
@@ -256,26 +294,26 @@ public interface SwgohAPI
      * @param allyCode  The number that uniquely identifies a player, found in the player's game profile.
      * @return The guild details, specified by the allyCode.
      * @throws IOException if http connection fails.
-     * @see #getGuildDetails(int, SwgohAPIClient.Language)
+     * @see #getGuildDetails(int, Language)
      * @see #getGuildDetailsJSON(int)
-     * @see #getGuildDetailsJSON(int, SwgohAPIClient.Language)
+     * @see #getGuildDetailsJSON(int, Language)
      */
     Guild getGuildDetails( int allyCode ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for guild details in the specified language.
      *
-     * If you want to include players' roster information, use {@link #getGuild(int, SwgohAPIClient.Language)}
+     * If you want to include players' roster information, use {@link #getGuild(int, Language)}
      *
      * @param allyCode  The number that uniquely identifies a player, found in the player's game profile.
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return The guild details, specified by the allyCode.
      * @throws IOException if http connection fails.
      * @see #getGuildDetails(int)
      * @see #getGuildDetailsJSON(int)
-     * @see #getGuildDetailsJSON(int, SwgohAPIClient.Language)
+     * @see #getGuildDetailsJSON(int, Language)
      */
-    Guild getGuildDetails( int allyCode, SwgohAPIClient.Language language ) throws IOException;
+    Guild getGuildDetails( int allyCode, Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a JSON string of guild details in the default language.
@@ -286,25 +324,25 @@ public interface SwgohAPI
      * @return The guild details, specified by the allyCode.
      * @throws IOException if http connection fails.
      * @see #getGuildDetails(int)
-     * @see #getGuildDetails(int, SwgohAPIClient.Language)
-     * @see #getGuildDetailsJSON(int, SwgohAPIClient.Language)
+     * @see #getGuildDetails(int, Language)
+     * @see #getGuildDetailsJSON(int, Language)
      */
     String getGuildDetailsJSON( int allyCode ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a JSON string of guild details in the specified language.
      *
-     * If you want to include players' roster information, use {@link #getGuildJSON(int, SwgohAPIClient.Language)}
+     * If you want to include players' roster information, use {@link #getGuildJSON(int, Language)}
      *
      * @param allyCode  The number that uniquely identifies a player, found in the player's game profile.
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return The guild details, specified by the allyCode.
      * @throws IOException if http connection fails.
      * @see #getGuildDetails(int)
-     * @see #getGuildDetails(int, SwgohAPIClient.Language)
+     * @see #getGuildDetails(int, Language)
      * @see #getGuildDetailsJSON(int)
      */
-    String getGuildDetailsJSON( int allyCode, SwgohAPIClient.Language language ) throws IOException;
+    String getGuildDetailsJSON( int allyCode, Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a list of player objects in the default language.
@@ -315,9 +353,9 @@ public interface SwgohAPI
      * @param allyCode  The number that uniquely identifies a player, found in the player's game profile.
      * @return List of players belonging to the same guild as the player identified by the allyCode
      * @throws IOException if http connection fails.
-     * @see #getGuildRoster(int, SwgohAPIClient.Language)
+     * @see #getGuildRoster(int, Language)
      * @see #getGuildRosterJSON(int)
-     * @see #getGuildRosterJSON(int, SwgohAPIClient.Language)
+     * @see #getGuildRosterJSON(int, Language)
      */
     List<Player> getGuildRoster( int allyCode ) throws IOException;
 
@@ -328,14 +366,14 @@ public interface SwgohAPI
      * allyCode.
      *
      * @param allyCode  The number that uniquely identifies a player, found in the player's game profile.
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return List of players belonging to the same guild as the player identified by the allyCode
      * @throws IOException if http connection fails.
      * @see #getGuildRoster(int)
      * @see #getGuildRosterJSON(int)
-     * @see #getGuildRosterJSON(int, SwgohAPIClient.Language)
+     * @see #getGuildRosterJSON(int, Language)
      */
-    List<Player> getGuildRoster( int allyCode, SwgohAPIClient.Language language ) throws IOException;
+    List<Player> getGuildRoster( int allyCode, Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a JSON string of player objects in the default language.
@@ -347,8 +385,8 @@ public interface SwgohAPI
      * @return JSON string of the list of players belonging to the same guild as the player identified by the allyCode
      * @throws IOException if http connection fails.
      * @see #getGuildRoster(int)
-     * @see #getGuildRoster(int, SwgohAPIClient.Language)
-     * @see #getGuildRosterJSON(int, SwgohAPIClient.Language)
+     * @see #getGuildRoster(int, Language)
+     * @see #getGuildRosterJSON(int, Language)
      */
     String getGuildRosterJSON( int allyCode ) throws IOException;
 
@@ -359,37 +397,37 @@ public interface SwgohAPI
      * given allyCode.
      *
      * @param allyCode  The number that uniquely identifies a player, found in the player's game profile.
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return JSON string of the list of players belonging to the same guild as the player identified by the allyCode
      * @throws IOException if http connection fails.
      * @see #getGuildRoster(int)
-     * @see #getGuildRoster(int, SwgohAPIClient.Language)
+     * @see #getGuildRoster(int, Language)
      * @see #getGuildRosterJSON(int)
      */
-    String getGuildRosterJSON( int allyCode, SwgohAPIClient.Language language ) throws IOException;
+    String getGuildRosterJSON( int allyCode, Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a list of game events in the default language.
      *
      * @return List of events
      * @throws IOException if http connection fails.
-     * @see #getEvents(SwgohAPIClient.Language)
+     * @see #getEvents(Language)
      * @see #getEventsJSON()
-     * @see #getEventsJSON(SwgohAPIClient.Language)
+     * @see #getEventsJSON(Language)
      */
     List<Event> getEvents() throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a list of game events in the specified language.
      *
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return List of events
      * @throws IOException if http connection fails.
      * @see #getEvents()
      * @see #getEventsJSON()
-     * @see #getEventsJSON(SwgohAPIClient.Language)
+     * @see #getEventsJSON(Language)
      */
-    List<Event> getEvents( SwgohAPIClient.Language language ) throws IOException;
+    List<Event> getEvents( Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a JSON string of game events in the default language.
@@ -397,22 +435,22 @@ public interface SwgohAPI
      * @return JSON string of the list of events
      * @throws IOException if http connection fails.
      * @see #getEvents()
-     * @see #getEvents(SwgohAPIClient.Language)
-     * @see #getEventsJSON(SwgohAPIClient.Language)
+     * @see #getEvents(Language)
+     * @see #getEventsJSON(Language)
      */
     String getEventsJSON() throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a JSON string of game events in the specified language.
      *
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return JSON string of the list of events
      * @throws IOException if http connection fails.
      * @see #getEvents()
-     * @see #getEvents(SwgohAPIClient.Language)
+     * @see #getEvents(Language)
      * @see #getEventsJSON()
      */
-    String getEventsJSON( SwgohAPIClient.Language language ) throws IOException;
+    String getEventsJSON( Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a map of game units in the default language.
@@ -422,9 +460,9 @@ public interface SwgohAPI
      *
      * @return The game's playable characters and ships
      * @throws IOException if http connection fails.
-     * @see #getUnits(SwgohAPIClient.Language)
+     * @see #getUnits(Language)
      * @see #getUnitsJSON()
-     * @see #getUnitsJSON(SwgohAPIClient.Language)
+     * @see #getUnitsJSON(Language)
      */
     Map<String, Unit> getUnits() throws IOException;
 
@@ -434,14 +472,14 @@ public interface SwgohAPI
      * In the {@link Map} response, the {@link String} key is the unit's ID and the {@link Unit} value is the rest of
      * the information for the unit.
      *
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return The game's playable characters and ships
      * @throws IOException if http connection fails.
      * @see #getUnits()
      * @see #getUnitsJSON()
-     * @see #getUnitsJSON(SwgohAPIClient.Language)
+     * @see #getUnitsJSON(Language)
      */
-    Map<String, Unit> getUnits( SwgohAPIClient.Language language ) throws IOException;
+    Map<String, Unit> getUnits( Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a JSON string of game units in the default language.
@@ -449,45 +487,45 @@ public interface SwgohAPI
      * @return JSON string of the game's playable characters and ships
      * @throws IOException if http connection fails.
      * @see #getUnits()
-     * @see #getUnits(SwgohAPIClient.Language)
-     * @see #getUnitsJSON(SwgohAPIClient.Language)
+     * @see #getUnits(Language)
+     * @see #getUnitsJSON(Language)
      */
     String getUnitsJSON() throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a JSON string of game units in the specified language.
      *
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return JSON string of the game's playable characters and ships
      * @throws IOException if http connection fails.
      * @see #getUnits()
-     * @see #getUnits(SwgohAPIClient.Language)
+     * @see #getUnits(Language)
      * @see #getUnitsJSON()
      */
-    String getUnitsJSON( SwgohAPIClient.Language language ) throws IOException;
+    String getUnitsJSON( Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a JSON string of arena types in the default language.
      *
      * @return List of arena types
      * @throws IOException if http connection fails.
-     * @see #getArenaSquadMemberTypes(SwgohAPIClient.Language)
+     * @see #getArenaSquadMemberTypes(Language)
      * @see #getArenaSquadMemberTypesJSON()
-     * @see #getArenaSquadMemberTypesJSON(SwgohAPIClient.Language)
+     * @see #getArenaSquadMemberTypesJSON(Language)
      */
     List<ArenaSquadMemberType> getArenaSquadMemberTypes() throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a JSON string of arena types in the specified language.
      *
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return List of arena types
      * @throws IOException if http connection fails.
      * @see #getArenaSquadMemberTypes()
      * @see #getArenaSquadMemberTypesJSON()
-     * @see #getArenaSquadMemberTypesJSON(SwgohAPIClient.Language)
+     * @see #getArenaSquadMemberTypesJSON(Language)
      */
-    List<ArenaSquadMemberType> getArenaSquadMemberTypes( SwgohAPIClient.Language language ) throws IOException;
+    List<ArenaSquadMemberType> getArenaSquadMemberTypes( Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a JSON string of arena types in the default language.
@@ -495,22 +533,22 @@ public interface SwgohAPI
      * @return JSON string of arena types
      * @throws IOException if http connection fails.
      * @see #getArenaSquadMemberTypes()
-     * @see #getArenaSquadMemberTypes(SwgohAPIClient.Language)
-     * @see #getArenaSquadMemberTypesJSON(SwgohAPIClient.Language)
+     * @see #getArenaSquadMemberTypes(Language)
+     * @see #getArenaSquadMemberTypesJSON(Language)
      */
     String getArenaSquadMemberTypesJSON() throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a JSON string of arena types in the specified language.
      *
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return JSON string of arena types
      * @throws IOException if http connection fails.
      * @see #getArenaSquadMemberTypes()
-     * @see #getArenaSquadMemberTypes(SwgohAPIClient.Language)
+     * @see #getArenaSquadMemberTypes(Language)
      * @see #getArenaSquadMemberTypesJSON()
      */
-    String getArenaSquadMemberTypesJSON( SwgohAPIClient.Language language ) throws IOException;
+    String getArenaSquadMemberTypesJSON( Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a map of gear pieces in the default language.
@@ -520,9 +558,9 @@ public interface SwgohAPI
      *
      * @return All the gear in the game, and where to find them.
      * @throws IOException if http connection fails.
-     * @see #getGear(SwgohAPIClient.Language)
+     * @see #getGear(Language)
      * @see #getGearJSON()
-     * @see #getGearJSON(SwgohAPIClient.Language)
+     * @see #getGearJSON(Language)
      */
     Map<String,Gear> getGear() throws IOException;
 
@@ -532,14 +570,14 @@ public interface SwgohAPI
      * In the {@link Map} response, the {@link String} key is the gear's equipmentId and the {@link Gear} value is the
      * rest of the information for the gear piece.
      *
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return All the gear in the game, and where to find them.
      * @throws IOException if http connection fails.
      * @see #getGear()
      * @see #getGearJSON()
-     * @see #getGearJSON(SwgohAPIClient.Language)
+     * @see #getGearJSON(Language)
      */
-    Map<String,Gear> getGear( SwgohAPIClient.Language language ) throws IOException;
+    Map<String,Gear> getGear( Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a JSON string of a map of gear pieces in the default language.
@@ -550,8 +588,8 @@ public interface SwgohAPI
      * @return JSON string of all the gear in the game, and where to find them.
      * @throws IOException if http connection fails.
      * @see #getGear()
-     * @see #getGear(SwgohAPIClient.Language)
-     * @see #getGearJSON(SwgohAPIClient.Language)
+     * @see #getGear(Language)
+     * @see #getGearJSON(Language)
      */
     String getGearJSON() throws IOException;
 
@@ -562,37 +600,37 @@ public interface SwgohAPI
      * In the {@link Map} response, the {@link String} key is the gear's equipmentId and the {@link Gear} value is the
      * rest of the information for the gear piece.
      *
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return JSON string of all the gear in the game, and where to find them.
      * @throws IOException if http connection fails.
      * @see #getGear()
-     * @see #getGear(SwgohAPIClient.Language)
+     * @see #getGear(Language)
      * @see #getGearJSON()
      */
-    String getGearJSON( SwgohAPIClient.Language language ) throws IOException;
+    String getGearJSON( Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a list of all mod sets in the default language.
      *
      * @return All the mod sets in the game.
      * @throws IOException if http connection fails.
-     * @see #getModSets(SwgohAPIClient.Language)
+     * @see #getModSets(Language)
      * @see #getModSetsJSON()
-     * @see #getModSetsJSON(SwgohAPIClient.Language)
+     * @see #getModSetsJSON(Language)
      */
     List<ModSet> getModSets() throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a list of all mod sets in the specified language.
      *
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return All the mod sets in the game.
      * @throws IOException if http connection fails.
      * @see #getModSets()
      * @see #getModSetsJSON()
-     * @see #getModSetsJSON(SwgohAPIClient.Language)
+     * @see #getModSetsJSON(Language)
      */
-    List<ModSet> getModSets( SwgohAPIClient.Language language ) throws IOException;
+    List<ModSet> getModSets( Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a JSON string of a list of all mod sets in the default
@@ -601,8 +639,8 @@ public interface SwgohAPI
      * @return JSON string of all the mod sets in the game.
      * @throws IOException if http connection fails.
      * @see #getModSets()
-     * @see #getModSets(SwgohAPIClient.Language)
-     * @see #getModSetsJSON(SwgohAPIClient.Language)
+     * @see #getModSets(Language)
+     * @see #getModSetsJSON(Language)
      */
     String getModSetsJSON() throws IOException;
 
@@ -610,37 +648,37 @@ public interface SwgohAPI
      * Makes an http connection to the swgoh.help API for a JSON string of a list of all mod sets in the specified
      * language.
      *
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return JSON string of all the mod sets in the game.
      * @throws IOException if http connection fails.
      * @see #getModSets()
-     * @see #getModSets(SwgohAPIClient.Language)
+     * @see #getModSets(Language)
      * @see #getModSetsJSON()
      */
-    String getModSetsJSON( SwgohAPIClient.Language language ) throws IOException;
+    String getModSetsJSON( Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a list of all mod stat fields in the default language.
      *
      * @return All the mod stat fields in the game.
      * @throws IOException if http connection fails.
-     * @see #getModStatFields(SwgohAPIClient.Language)
+     * @see #getModStatFields(Language)
      * @see #getModStatFieldsJSON()
-     * @see #getModStatFieldsJSON(SwgohAPIClient.Language)
+     * @see #getModStatFieldsJSON(Language)
      */
     List<String> getModStatFields() throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a list of all mod stat fields in the specified language.
      *
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return All the mod stat fields in the game.
      * @throws IOException if http connection fails.
      * @see #getModStatFields()
      * @see #getModStatFieldsJSON()
-     * @see #getModStatFieldsJSON(SwgohAPIClient.Language)
+     * @see #getModStatFieldsJSON(Language)
      */
-    List<String> getModStatFields( SwgohAPIClient.Language language ) throws IOException;
+    List<String> getModStatFields( Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a JSON string of a list of all mod stat fields in the default
@@ -649,8 +687,8 @@ public interface SwgohAPI
      * @return JSON string of all the mod stat fields in the game.
      * @throws IOException if http connection fails.
      * @see #getModStatFields()
-     * @see #getModStatFields(SwgohAPIClient.Language)
-     * @see #getModStatFieldsJSON(SwgohAPIClient.Language)
+     * @see #getModStatFields(Language)
+     * @see #getModStatFieldsJSON(Language)
      */
     String getModStatFieldsJSON() throws IOException;
 
@@ -658,37 +696,37 @@ public interface SwgohAPI
      * Makes an http connection to the swgoh.help API for a JSON string of a list of all mod stat fields in the
      * specified language.
      *
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return JSON string of all the mod stat fields in the game.
      * @throws IOException if http connection fails.
      * @see #getModStatFields()
-     * @see #getModStatFields(SwgohAPIClient.Language)
+     * @see #getModStatFields(Language)
      * @see #getModStatFieldsJSON()
      */
-    String getModStatFieldsJSON( SwgohAPIClient.Language language ) throws IOException;
+    String getModStatFieldsJSON( Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a list of all unit abilities in the default language.
      *
      * @return All the unit abilities in the game.
      * @throws IOException if http connection fails.
-     * @see #getSkills(SwgohAPIClient.Language)
+     * @see #getSkills(Language)
      * @see #getSkillsJSON()
-     * @see #getSkillsJSON(SwgohAPIClient.Language)
+     * @see #getSkillsJSON(Language)
      */
     Map<String, BaseSkill> getSkills() throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a list of all unit abilities in the specified language.
      *
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return All the unit abilities in the game.
      * @throws IOException if http connection fails.
      * @see #getSkills()
      * @see #getSkillsJSON()
-     * @see #getSkillsJSON(SwgohAPIClient.Language)
+     * @see #getSkillsJSON(Language)
      */
-    Map<String, BaseSkill> getSkills( SwgohAPIClient.Language language ) throws IOException;
+    Map<String, BaseSkill> getSkills( Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a JSON string of a list of all unit abilities in the default
@@ -697,8 +735,8 @@ public interface SwgohAPI
      * @return JSON string of all the unit abilities in the game.
      * @throws IOException if http connection fails.
      * @see #getSkills()
-     * @see #getSkills(SwgohAPIClient.Language)
-     * @see #getSkillsJSON(SwgohAPIClient.Language)
+     * @see #getSkills(Language)
+     * @see #getSkillsJSON(Language)
      */
     String getSkillsJSON() throws IOException;
 
@@ -706,23 +744,23 @@ public interface SwgohAPI
      * Makes an http connection to the swgoh.help API for a JSON string of a list of all unit abilities in the specified
      * language.
      *
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return JSON string of all the unit abilities in the game.
      * @throws IOException if http connection fails.
      * @see #getSkills()
-     * @see #getSkills(SwgohAPIClient.Language)
+     * @see #getSkills(Language)
      * @see #getSkillsJSON()
      */
-    String getSkillsJSON( SwgohAPIClient.Language language ) throws IOException;
+    String getSkillsJSON( Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a map of all skill types in the default language.
      *
      * @return All the skill types in the game.
      * @throws IOException if http connection fails.
-     * @see #getSkillTypes(SwgohAPIClient.Language)
+     * @see #getSkillTypes(Language)
      * @see #getSkillTypesJSON()
-     * @see #getSkillTypesJSON(SwgohAPIClient.Language)
+     * @see #getSkillTypesJSON(Language)
      */
     Map<String, SkillType> getSkillTypes() throws IOException;
 
@@ -730,14 +768,14 @@ public interface SwgohAPI
      * Makes an http connection to the swgoh.help API for a map of all skill types in the specified
      * language.
      *
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return All the skill types in the game.
      * @throws IOException if http connection fails.
      * @see #getSkillTypes()
      * @see #getSkillTypesJSON()
-     * @see #getSkillTypesJSON(SwgohAPIClient.Language)
+     * @see #getSkillTypesJSON(Language)
      */
-    Map<String, SkillType> getSkillTypes( SwgohAPIClient.Language language ) throws IOException;
+    Map<String, SkillType> getSkillTypes( Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a JSON string of a map of all skill types in the default
@@ -746,8 +784,8 @@ public interface SwgohAPI
      * @return JSON string of all the skill types in the game.
      * @throws IOException if http connection fails.
      * @see #getSkillTypes()
-     * @see #getSkillTypes(SwgohAPIClient.Language)
-     * @see #getSkillTypesJSON(SwgohAPIClient.Language)
+     * @see #getSkillTypes(Language)
+     * @see #getSkillTypesJSON(Language)
      */
     String getSkillTypesJSON() throws IOException;
 
@@ -755,37 +793,37 @@ public interface SwgohAPI
      * Makes an http connection to the swgoh.help API for a JSON string of a map of all skill types in the specified
      * language.
      *
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return JSON string of all the skill types in the game.
      * @throws IOException if http connection fails.
      * @see #getSkillTypes()
-     * @see #getSkillTypes(SwgohAPIClient.Language)
+     * @see #getSkillTypes(Language)
      * @see #getSkillTypesJSON()
      */
-    String getSkillTypesJSON( SwgohAPIClient.Language language ) throws IOException;
+    String getSkillTypesJSON( Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a list of Territory Battles in the default language.
      *
      * @return List of public information for each Territory Battle
      * @throws IOException if http connection fails.
-     * @see #getTBs(SwgohAPIClient.Language)
+     * @see #getTBs(Language)
      * @see #getTBsJSON()
-     * @see #getTBsJSON(SwgohAPIClient.Language)
+     * @see #getTBsJSON(Language)
      */
     List<TB> getTBs() throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a list of Territory Battles in the specified language.
      *
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return List of public information for each Territory Battle
      * @throws IOException if http connection fails.
      * @see #getTBs()
      * @see #getTBsJSON()
-     * @see #getTBsJSON(SwgohAPIClient.Language)
+     * @see #getTBsJSON(Language)
      */
-    List<TB> getTBs( SwgohAPIClient.Language language ) throws IOException;
+    List<TB> getTBs( Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a JSON string of the list of Territory Battles in the default
@@ -794,8 +832,8 @@ public interface SwgohAPI
      * @return JSON string of the list of public information for each Territory Battle
      * @throws IOException if http connection fails.
      * @see #getTBs()
-     * @see #getTBs(SwgohAPIClient.Language)
-     * @see #getTBsJSON(SwgohAPIClient.Language)
+     * @see #getTBs(Language)
+     * @see #getTBsJSON(Language)
      */
     String getTBsJSON() throws IOException;
 
@@ -803,37 +841,37 @@ public interface SwgohAPI
      * Makes an http connection to the swgoh.help API for a JSON string of the list of Territory Battles in the
      * specified language.
      *
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return JSON string of the list of public information for each Territory Battle
      * @throws IOException if http connection fails.
      * @see #getTBs()
-     * @see #getTBs(SwgohAPIClient.Language)
+     * @see #getTBs(Language)
      * @see #getTBsJSON()
      */
-    String getTBsJSON( SwgohAPIClient.Language language ) throws IOException;
+    String getTBsJSON( Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a map of all zetas in the default language.
      *
      * @return All zetas in the game
      * @throws IOException if http connection fails.
-     * @see #getZetas(SwgohAPIClient.Language)
+     * @see #getZetas(Language)
      * @see #getZetasJSON()
-     * @see #getZetasJSON(SwgohAPIClient.Language)
+     * @see #getZetasJSON(Language)
      */
     Map<String, Zeta> getZetas() throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a map of all zetas in the specified language.
      *
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return All zetas in the game
      * @throws IOException if http connection fails.
      * @see #getZetas()
      * @see #getZetasJSON()
-     * @see #getZetasJSON(SwgohAPIClient.Language)
+     * @see #getZetasJSON(Language)
      */
-    Map<String, Zeta> getZetas( SwgohAPIClient.Language language ) throws IOException;
+    Map<String, Zeta> getZetas( Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a JSON string of the map of all zetas in the default language.
@@ -841,8 +879,8 @@ public interface SwgohAPI
      * @return JSON string of all zetas in the game
      * @throws IOException if http connection fails.
      * @see #getZetas()
-     * @see #getZetas(SwgohAPIClient.Language)
-     * @see #getZetasJSON(SwgohAPIClient.Language)
+     * @see #getZetas(Language)
+     * @see #getZetasJSON(Language)
      */
     String getZetasJSON() throws IOException;
 
@@ -850,14 +888,14 @@ public interface SwgohAPI
      * Makes an http connection to the swgoh.help API for a JSON string of the map of all zetas in the specified
      * language.
      *
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return JSON string of all zetas in the game
      * @throws IOException if http connection fails.
      * @see #getZetas()
-     * @see #getZetas(SwgohAPIClient.Language)
+     * @see #getZetas(Language)
      * @see #getZetasJSON()
      */
-    String getZetasJSON( SwgohAPIClient.Language language ) throws IOException;
+    String getZetasJSON( Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a list of all zetas, including the unit, in the default
@@ -865,9 +903,9 @@ public interface SwgohAPI
      *
      * @return List of all zetas, including the unit
      * @throws IOException if http connection fails.
-     * @see #getZetasWithUnit(SwgohAPIClient.Language)
+     * @see #getZetasWithUnit(Language)
      * @see #getZetasWithUnitJSON()
-     * @see #getZetasWithUnitJSON(SwgohAPIClient.Language)
+     * @see #getZetasWithUnitJSON(Language)
      */
     List<Zeta> getZetasWithUnit() throws IOException;
 
@@ -875,14 +913,14 @@ public interface SwgohAPI
      * Makes an http connection to the swgoh.help API for a list of all zetas, including the unit, in the specified
      * language.
      *
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return List of all zetas, including the unit
      * @throws IOException if http connection fails.
      * @see #getZetasWithUnit()
      * @see #getZetasWithUnitJSON()
-     * @see #getZetasWithUnitJSON(SwgohAPIClient.Language)
+     * @see #getZetasWithUnitJSON(Language)
      */
-    List<Zeta> getZetasWithUnit( SwgohAPIClient.Language language ) throws IOException;
+    List<Zeta> getZetasWithUnit( Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a JSON string of the list of all zetas, including the unit, in
@@ -892,8 +930,8 @@ public interface SwgohAPI
      * @return JSON string of the list of all zetas, including the unit
      * @throws IOException if http connection fails.
      * @see #getZetasWithUnit()
-     * @see #getZetasWithUnit(SwgohAPIClient.Language)
-     * @see #getZetasWithUnitJSON(SwgohAPIClient.Language)
+     * @see #getZetasWithUnit(Language)
+     * @see #getZetasWithUnitJSON(Language)
      */
     String getZetasWithUnitJSON() throws IOException;
 
@@ -901,37 +939,37 @@ public interface SwgohAPI
      * Makes an http connection to the swgoh.help API for a JSON string of the list of all zetas, including the unit, in
      * the specified language.
      *
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return JSON string of the list of all zetas, including the unit
      * @throws IOException if http connection fails.
      * @see #getZetasWithUnit()
-     * @see #getZetasWithUnit(SwgohAPIClient.Language)
+     * @see #getZetasWithUnit(Language)
      * @see #getZetasWithUnitJSON()
      */
-    String getZetasWithUnitJSON( SwgohAPIClient.Language language ) throws IOException;
+    String getZetasWithUnitJSON( Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a list of zeta recommendations in the default language.
      *
      * @return List of zeta recommendations
      * @throws IOException if http connection fails.
-     * @see #getZetaRecommendations(SwgohAPIClient.Language)
+     * @see #getZetaRecommendations(Language)
      * @see #getZetaRecommendationsJSON()
-     * @see #getZetaRecommendationsJSON(SwgohAPIClient.Language)
+     * @see #getZetaRecommendationsJSON(Language)
      */
     ZetaRecommendations getZetaRecommendations() throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a list of zeta recommendations in the specified language.
      *
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return List of zeta recommendations
      * @throws IOException if http connection fails.
      * @see #getZetaRecommendations()
      * @see #getZetaRecommendationsJSON()
-     * @see #getZetaRecommendationsJSON(SwgohAPIClient.Language)
+     * @see #getZetaRecommendationsJSON(Language)
      */
-    ZetaRecommendations getZetaRecommendations( SwgohAPIClient.Language language ) throws IOException;
+    ZetaRecommendations getZetaRecommendations( Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a JSON string of a list of zeta recommendations in the default
@@ -940,8 +978,8 @@ public interface SwgohAPI
      * @return List of zeta recommendations
      * @throws IOException if http connection fails.
      * @see #getZetaRecommendations()
-     * @see #getZetaRecommendations(SwgohAPIClient.Language)
-     * @see #getZetaRecommendationsJSON(SwgohAPIClient.Language)
+     * @see #getZetaRecommendations(Language)
+     * @see #getZetaRecommendationsJSON(Language)
      */
     String getZetaRecommendationsJSON() throws IOException;
 
@@ -949,37 +987,37 @@ public interface SwgohAPI
      * Makes an http connection to the swgoh.help API for a JSON string of a list of zeta recommendations in the
      * specified language.
      *
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return List of zeta recommendations
      * @throws IOException if http connection fails.
      * @see #getZetaRecommendations()
-     * @see #getZetaRecommendations(SwgohAPIClient.Language)
+     * @see #getZetaRecommendations(Language)
      * @see #getZetaRecommendationsJSON()
      */
-    String getZetaRecommendationsJSON( SwgohAPIClient.Language language ) throws IOException;
+    String getZetaRecommendationsJSON( Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a list of battles in the default language.
      *
      * @return list of battles
      * @throws IOException if http connection fails.
-     * @see #getBattles(SwgohAPIClient.Language)
+     * @see #getBattles(Language)
      * @see #getBattlesJSON()
-     * @see #getBattlesJSON(SwgohAPIClient.Language)
+     * @see #getBattlesJSON(Language)
      */
     List<Battle> getBattles() throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a list of battles in the specified language.
      *
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return list of battles
      * @throws IOException if http connection fails.
      * @see #getBattles()
      * @see #getBattlesJSON()
-     * @see #getBattlesJSON(SwgohAPIClient.Language)
+     * @see #getBattlesJSON(Language)
      */
-    List<Battle> getBattles( SwgohAPIClient.Language language ) throws IOException;
+    List<Battle> getBattles( Language language ) throws IOException;
 
     /**
      * Makes an http connection to the swgoh.help API for a JSON string of the list of battles in the default language.
@@ -987,8 +1025,8 @@ public interface SwgohAPI
      * @return JSON string of the list of battles
      * @throws IOException if http connection fails.
      * @see #getBattles()
-     * @see #getBattles(SwgohAPIClient.Language)
-     * @see #getBattlesJSON(SwgohAPIClient.Language)
+     * @see #getBattles(Language)
+     * @see #getBattlesJSON(Language)
      */
     String getBattlesJSON() throws IOException;
 
@@ -996,12 +1034,12 @@ public interface SwgohAPI
      * Makes an http connection to the swgoh.help API for a JSON string of the list of battles in the specified
      * language.
      *
-     * @param language  The {@link SwgohAPIClient.Language} that the result should be displayed in.
+     * @param language  The {@link Language} that the result should be displayed in.
      * @return JSON string of the list of battles
      * @throws IOException if http connection fails.
      * @see #getBattles()
-     * @see #getBattles(SwgohAPIClient.Language)
+     * @see #getBattles(Language)
      * @see #getBattlesJSON()
      */
-    String getBattlesJSON( SwgohAPIClient.Language language ) throws IOException;
+    String getBattlesJSON( Language language ) throws IOException;
 }

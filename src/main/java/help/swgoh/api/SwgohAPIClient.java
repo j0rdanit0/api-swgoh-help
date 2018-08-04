@@ -25,44 +25,6 @@ public class SwgohAPIClient implements SwgohAPI
 
     private String access_token;
 
-    public enum Language
-    {
-        English( "ENG_US", "English" ),
-        ChineseSimplified( "CHS_CN", "Chinese" ),
-        ChineseTraditional( "CHT_CN", "Traditional Chinese" ),
-        French( "FRE_FR", "French" ),
-        German( "GER_DE", "German" ),
-        Indonesian( "IND_ID", "Indonesian" ),
-        Italian( "ITA_IT", "Italian" ),
-        Japanese( "JPN_JP", "Japanese" ),
-        Korean( "KOR_KR", "Korean" ),
-        Portuguese( "POR_BR", "Portuguese" ),
-        Russian( "RUS_RU", "Russian" ),
-        Spanish( "SPA_XM", "Spanish" ),
-        Thai( "THA_TH", "Thai" ),
-        Turkish( "TUR_TR", "Turkish" ),
-        ;
-
-        private final String displayName;
-        private final String swgohCode;
-
-        Language( String swgohCode, String displayName )
-        {
-            this.swgohCode = swgohCode;
-            this.displayName = displayName;
-        }
-
-        public String getDisplayName()
-        {
-            return displayName;
-        }
-
-        public String getSwgohCode()
-        {
-            return swgohCode;
-        }
-    }
-
     public enum DataCriteria
     {
         EVENTS, UNITS, ARENA, GEAR, MOD_SETS, MOD_STATS, SKILLS, SKILL_TYPES, TB, ZETAS, ZETA_ABILITIES, ZETA_RECOMMENDATIONS, BATTLES;
@@ -98,7 +60,7 @@ public class SwgohAPIClient implements SwgohAPI
 
         private String constructUrl( String urlBase, String dataCriteria, Language language )
         {
-            String lang = language != null ? "/"+language.getSwgohCode() : "";
+            String lang = language != null ? "?lang="+language.getSwgohCode() : "";
             String criteria = dataCriteria != null ? dataCriteria : "";
             return urlBase + String.format( path, criteria ) + lang;
         }

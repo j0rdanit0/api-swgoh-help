@@ -3,10 +3,18 @@ package help.swgoh.api.response;
 public class Unit
 {
     public String name;
+    public BaseStat[] baseStats;
     public int alignment;
     public String type;
     public Crew[] crew;
     public String[] tags;
+
+    public class BaseStat
+    {
+        public int unitStatId;
+        public int statValueDecimal;
+        public long unscaledDecimalValue;
+    }
 
     public class Crew
     {

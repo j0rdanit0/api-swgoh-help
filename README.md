@@ -52,6 +52,14 @@ List<TB> territoryBattleInfo = api.getTBs();
 
 Want to receive the raw JSON and parse it yourself? Each endpoint is overloaded with a -JSON postfix that simply returns a JSON String.
 
+# Language Specification
+To receive data in a supported language, simply pass the specified language into the overloaded method of your choice.
+
+Example of language-specified result:
+```java
+Map<String,Unit> units = api.getUnits( SwgohAPI.Language.French );
+```
+
 # Spring Integration
 If you'd like to see this work with [Spring's dependency injection magic](https://docs.spring.io/spring/docs/current/spring-framework-reference/core.html#spring-core), simply write something similar to the following code:
 ```java
