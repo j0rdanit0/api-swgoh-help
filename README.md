@@ -20,6 +20,7 @@ Include the swgoh-api-connector artifact:
 compile 'help.swgoh.api:swgoh-api-connector:@VERSION@'
 ```
 
+### Examples
 In code, use the SwgohAPIBuilder to initialize a new instance of the client:
 ```java
 SwgohAPI api = new SwgohAPIBuilder()
@@ -90,8 +91,8 @@ public class SwgohService
 ```
 
 # Available Language Clients
-JavaScript:<br/>
-https://github.com/r3volved/api-swgoh-help
+NodeJS:<br/>
+https://github.com/r3volved/api-swgoh-help/tree/node
 
 Java:<br/>
 https://github.com/j0rdanit0/api-swgoh-help
@@ -99,3 +100,9 @@ https://github.com/j0rdanit0/api-swgoh-help
 C#:<br/>
 https://github.com/SdtBarbarossa/SWGOH-Help-Api-C-Sharp
 https://gist.github.com/dwcullop/9c6b7933fe23163e59b94da1997adee7
+
+PHP:<br/>
+https://github.com/r3volved/api-swgoh-help/tree/php
+
+Google App Script:<br/>
+https://github.com/Dragonsight91/api-swgoh-help
