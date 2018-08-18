@@ -2,14 +2,16 @@ package help.swgoh.api.response;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Player extends BasePlayer
+public class SwgohPlayer
 {
-    public int level;
+    public int allyCode;
+    public String name;
+    public short level;
     public String guildName;
     public int gpFull;
     public int gpChar;
     public int gpShip;
-    public RosterUnit[] roster;
+    public SwgohRosterUnit[] roster;
     public Arena arena;
 
     public class Arena
@@ -25,7 +27,7 @@ public class Player extends BasePlayer
             public class ArenaSquadMember
             {
                 public String id;
-                public String name;
+                public String defId;
                 public ArenaSquadMemberType type;
             }
         }

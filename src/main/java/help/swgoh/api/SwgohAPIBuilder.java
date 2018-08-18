@@ -4,9 +4,6 @@ package help.swgoh.api;
  * This builder's sole purpose is to compile together the elements of a {@link SwgohAPISettings} object, which will be used
  * to create an instance of the {@link SwgohAPI} interface.
  *
- * If you would rather do this yourself, simply create a new {@link SwgohAPISettings} object and pass it into the
- * constructor of a new {@link SwgohAPIClient} object.
- *
  * @since 1.0.0
  */
 public class SwgohAPIBuilder
@@ -34,30 +31,6 @@ public class SwgohAPIBuilder
     public SwgohAPIBuilder withPassword( String password )
     {
         settings.setPassword( password );
-        return this;
-    }
-
-    /**
-     * Defines the client ID to be sent with the login request.
-     *
-     * @param clientId  The client ID to be sent with the login request
-     * @return The builder instance.
-     */
-    public SwgohAPIBuilder withClientId( String clientId )
-    {
-        settings.setClientId( clientId );
-        return this;
-    }
-
-    /**
-     * Defines the client secret to be sent with the login request.
-     *
-     * @param clientSecret  The client secret to be sent with the login request
-     * @return The builder instance.
-     */
-    public SwgohAPIBuilder withClientSecret( String clientSecret )
-    {
-        settings.setClientSecret( clientSecret );
         return this;
     }
 
