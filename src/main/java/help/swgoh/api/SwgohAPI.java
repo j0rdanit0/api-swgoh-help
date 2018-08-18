@@ -64,10 +64,15 @@ public interface SwgohAPI
         warDefinitionList, xpTableList
     }
 
-    SwgohPlayer getPlayer( int[] allyCodes, PlayerField... fields ) throws IOException;
-    SwgohPlayer getPlayer( int[] allyCodes, Language language, PlayerField... fields ) throws IOException;
-    String getPlayerJSON( int[] allyCodes, PlayerField... fields ) throws IOException;
-    String getPlayerJSON( int[] allyCodes, Language language, PlayerField... fields ) throws IOException;
+    SwgohPlayer getPlayer( int allyCode, PlayerField... fields ) throws IOException;
+    SwgohPlayer getPlayer( int allyCode, Language language, PlayerField... fields ) throws IOException;
+    String getPlayerJSON( int allyCode, PlayerField... fields ) throws IOException;
+    String getPlayerJSON( int allyCode, Language language, PlayerField... fields ) throws IOException;
+
+    List<SwgohPlayer> getPlayers( int[] allyCodes, PlayerField... fields ) throws IOException;
+    List<SwgohPlayer> getPlayers( int[] allyCodes, Language language, PlayerField... fields ) throws IOException;
+    String getPlayersJSON( int[] allyCodes, PlayerField... fields ) throws IOException;
+    String getPlayersJSON( int[] allyCodes, Language language, PlayerField... fields ) throws IOException;
 
     SwgohGuild getGuild( int allyCode, GuildField... fields ) throws IOException;
     SwgohGuild getGuild( int allyCode, Language language, GuildField... fields ) throws IOException;
@@ -82,5 +87,5 @@ public interface SwgohAPI
     String getSupportData( Collection collection, String... fields ) throws IOException;
     String getSupportData( Collection collection, Language language, String... fields ) throws IOException;
     String getSupportData( Collection collection, Map<String, String> matchCriteria, String... fields ) throws IOException;
-    String getSupportData( Collection collection, Language language, Map<String, String> matchCriteria, String... fields ) throws IOException;
+    String getSupportData( Collection collection, Map<String, String> matchCriteria, Language language, String... fields ) throws IOException;
 }

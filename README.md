@@ -1,5 +1,5 @@
 # api-swgoh-help [![Maven Central](https://img.shields.io/maven-central/v/help.swgoh.api/swgoh-api-connector.svg?style=flat-square)](https://mvnrepository.com/artifact/help.swgoh.api/swgoh-api-connector)
-Java client wrapper for the API at https://api.swgoh.help
+Java client wrapper for the API at https://apiv2.swgoh.help
 
 # Usage
 Include the swgoh-api-connector artifact:
@@ -26,39 +26,70 @@ In code, use the SwgohAPIBuilder to initialize a new instance of the client:
 SwgohAPI api = new SwgohAPIBuilder()
         .withUsername( "username" )
         .withPassword( "password" )
-        .withClientId( "clientId" )
-        .withClientSecret( "clientSecret" )
         .build();
 ```
 
-Request player profile by ally code:
+Request for a player profile by ally code:
+```java
+//single player
+int allyCode = 123456789;
+SwgohPlayer player = api.getPlayer( allyCode );
+```
+```java
+//multiple players
+int allyCode = 123456789;
+int otherAllyCode = 987654321;
+int[] allyCodes = new int[] { allyCode, otherAllyCode };
+List<SwgohPlayer> players = api.getPlayers( allyCodes );
+```
+```java
+//only return certain fields in the response
+int allyCode = 123456789;
+SwgohPlayer player = api.getPlayer( 
+        allyCode,
+        SwgohAPI.PlayerField.name,
+        SwgohAPI.PlayerField.allyCode,
+        SwgohAPI.PlayerField.roster,
+);
+```
+
+Request guild info by ally code:
 ```java
 int allyCode = 123456789;
-Player player = api.getPlayer( allyCode );
+SwgohGuild guild = api.getGuild( allyCode );
 ```
-
-Request guild rosters by ally code:
 ```java
+//only return certain fields in the response
 int allyCode = 123456789;
-List<Player> guild = api.getGuild( allyCode );
+SwgohGuild guild = api.getGuild( 
+        allyCode,
+        SwgohAPI.GuildField.name,
+        SwgohAPI.GuildField.gp,
+        SwgohAPI.GuildField.roster,
+        SwgohAPI.GuildField.updated
+);
 ```
 
-Request various other kinds of data:
+Want to receive the raw JSON and parse it yourself? Each typed endpoint is overloaded with a -JSON postfix that simply returns a JSON String.
+
+Request various other kinds of data, in JSON format:
 ```java
-Map<String,Unit> units = api.getUnits();
-List<Event> events = api.getEvents();
-List<TB> territoryBattleInfo = api.getTBs();
+String unitsJson = api.getSupportData( SwgohAPI.Collection.unitsList );
 ```
-...and so much more!
-
-Want to receive the raw JSON and parse it yourself? Each endpoint is overloaded with a -JSON postfix that simply returns a JSON String.
+```java
+//specify custom filtering criteria
+Map<String, String> matchCriteria = new HashMap<>();
+matchCriteria.put( "baseId", "GREEDO" );
+String greedoJson = api.getSupportData( SwgohAPI.Collection.unitsList, matchCriteria );
+```
+...and so much more! Please reference SwgohAPI.Collection for a list of all available data collections.
 
 # Language Specification
 To receive data in a supported language, simply pass the specified language into the overloaded method of your choice.
 
 Example of language-specified result:
 ```java
-Map<String,Unit> units = api.getUnits( SwgohAPI.Language.French );
+String jsonUnitsInKorean = api.getSupportData( SwgohAPI.Collection.unitsList, SwgohAPI.Language.Korean );
 ```
 
 # Spring Integration
@@ -73,8 +104,6 @@ public class SwgohConfiguration
         return new SwgohAPIBuilder()
                 .withUsername( "username" )
                 .withPassword( "password" )
-                .withClientId( "clientId" )
-                .withClientSecret( "clientSecret" )
                 .build();
     }
 }

@@ -58,25 +58,49 @@ public class SwgohAPIClient implements SwgohAPI
     }
 
     @Override
-    public SwgohPlayer getPlayer( int[] allyCodes, PlayerField... fields ) throws IOException
+    public SwgohPlayer getPlayer( int allyCode, PlayerField... fields ) throws IOException
     {
-        return getPlayer( allyCodes, null, fields );
+        return getPlayer( allyCode, null, fields );
     }
 
     @Override
-    public SwgohPlayer getPlayer( int[] allyCodes, Language language, PlayerField... fields ) throws IOException
+    public SwgohPlayer getPlayer( int allyCode, Language language, PlayerField... fields ) throws IOException
     {
-        return GSON.fromJson( getPlayerJSON( allyCodes, language, fields ), SwgohPlayer.class );
+        return GSON.fromJson( getPlayerJSON( allyCode, language, fields ), SwgohPlayer.class );
     }
 
     @Override
-    public String getPlayerJSON( int[] allyCodes, PlayerField... fields ) throws IOException
+    public String getPlayerJSON( int allyCode, PlayerField... fields ) throws IOException
     {
-        return getPlayerJSON( allyCodes, null, fields );
+        return getPlayerJSON( allyCode, null, fields );
     }
 
     @Override
-    public String getPlayerJSON( int[] allyCodes, Language language, PlayerField... fields ) throws IOException
+    public String getPlayerJSON( int allyCode, Language language, PlayerField... fields ) throws IOException
+    {
+        return getPlayersJSON( new int[]{allyCode}, language, fields );
+    }
+
+    @Override
+    public List<SwgohPlayer> getPlayers( int[] allyCodes, PlayerField... fields ) throws IOException
+    {
+        return getPlayers( allyCodes, null, fields );
+    }
+
+    @Override
+    public List<SwgohPlayer> getPlayers( int[] allyCodes, Language language, PlayerField... fields ) throws IOException
+    {
+        return GSON.fromJson( getPlayersJSON( allyCodes, language, fields ), new TypeToken<List<SwgohPlayer>>(){}.getType() );
+    }
+
+    @Override
+    public String getPlayersJSON( int[] allyCodes, PlayerField... fields ) throws IOException
+    {
+        return getPlayersJSON( allyCodes, null, fields );
+    }
+
+    @Override
+    public String getPlayersJSON( int[] allyCodes, Language language, PlayerField... fields ) throws IOException
     {
         Map<String, Object> payload = new HashMap<>();
         payload.put( "allycodes", allyCodes );
@@ -173,17 +197,17 @@ public class SwgohAPIClient implements SwgohAPI
     @Override
     public String getSupportData( Collection collection, Language language, String... fields ) throws IOException
     {
-        return getSupportData( collection, language, null, fields );
+        return getSupportData( collection, null, language, fields );
     }
 
     @Override
     public String getSupportData( Collection collection, Map<String, String> matchCriteria, String... fields ) throws IOException
     {
-        return getSupportData( collection, null, matchCriteria, fields );
+        return getSupportData( collection, matchCriteria, null, fields );
     }
 
     @Override
-    public String getSupportData( Collection collection, Language language, Map<String, String> matchCriteria, String... fields ) throws IOException
+    public String getSupportData( Collection collection, Map<String, String> matchCriteria, Language language, String... fields ) throws IOException
     {
         Map<String, Object> payload = new HashMap<>();
         payload.put( "collection", collection.name() );
