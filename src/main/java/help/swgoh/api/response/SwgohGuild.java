@@ -33,6 +33,6 @@ public class SwgohGuild
 
     public enum GuildMemberType
     {
-        NONE, PENDING, GUILDMEMBER, GUILDOFFICER, GUILDLEADER
+        NONE, GUILDPENDING, GUILDMEMBER, GUILDOFFICER, GUILDLEADER
     }
 }
