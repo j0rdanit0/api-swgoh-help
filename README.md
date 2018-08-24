@@ -132,6 +132,7 @@ https://gist.github.com/dwcullop/9c6b7933fe23163e59b94da1997adee7
 
 PHP:<br/>
 https://github.com/r3volved/api-swgoh-help/tree/php
+https://github.com/rayderua/swhelp-api-client
 
 Google App Script:<br/>
 https://github.com/Dragonsight91/api-swgoh-help
