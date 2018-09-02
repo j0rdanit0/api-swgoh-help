@@ -1,8 +1,6 @@
 package help.swgoh.api;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import help.swgoh.api.response.*;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -12,18 +10,14 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class SwgohAPIClient implements SwgohAPI
 {
-    private static final Gson GSON = new Gson();
-
     private final String loginCredentials;
-    private final String urlBase;
-
-    private String access_token;
 
     public enum API
     {
@@ -32,7 +26,17 @@ public class SwgohAPIClient implements SwgohAPI
         guild( "/swgoh/guild" ),
         units( "/swgoh/units" ),
         data( "/swgoh/data" ),
+        zetas( "/swgoh/zetas" ),
+        squads( "/swgoh/squads" ),
+        events( "/swgoh/events" ),
+        battles( "/swgoh/battles" ),
         ;
+
+        private static final String URL_BASE = "https://api.swgoh.help";
+        private static final Gson GSON = new Gson();
+
+        private volatile String access_token;
+        private volatile long expiredMillis;
 
         private final String path;
 
@@ -41,15 +45,90 @@ public class SwgohAPIClient implements SwgohAPI
             this.path = path;
         }
 
-        public URL getUrl( String urlBase ) throws MalformedURLException
+        public String call( String loginCredentials, Map<String, Object> payload ) throws IOException
         {
-            return new URL( urlBase + path );
+            try ( BufferedReader br = new BufferedReader( new InputStreamReader( getAuthorizedConnection( loginCredentials, payload ).getInputStream() ) ) )
+            {
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ( ( line = br.readLine() ) != null )
+                {
+                    sb.append( line ).append( "\n" );
+                }
+                return sb.toString();
+            }
+        }
+
+        private HttpURLConnection getAuthorizedConnection( String loginCredentials, Map<String, Object> payload ) throws IOException
+        {
+            if ( access_token == null || System.currentTimeMillis() > (expiredMillis - 10) )
+            {
+                login( loginCredentials );
+            }
+
+            byte[] postData = GSON.toJson( payload ).getBytes( StandardCharsets.UTF_8 );
+            HttpURLConnection connection = createConnection( this, postData );
+            connection.setRequestProperty( "Authorization", "Bearer " + access_token );
+            connection.setRequestProperty( "Content-Type", "application/json" );
+
+            try( DataOutputStream outputStream = new DataOutputStream( connection.getOutputStream() ) )
+            {
+                outputStream.write( postData );
+            }
+
+            return connection;
+        }
+
+        private HttpURLConnection createConnection( API api, byte[] postData ) throws IOException
+        {
+            HttpURLConnection connection = (HttpURLConnection) api.getUrl().openConnection();
+            connection.setRequestMethod( "POST" );
+
+            connection.setDoOutput( true );
+            connection.setInstanceFollowRedirects( false );
+            connection.setUseCaches( false );
+            connection.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded" );
+            connection.setRequestProperty( "charset", "utf-8" );
+            connection.setRequestProperty( "Content-Length", postData.length+"" );
+
+            return connection;
+        }
+
+        private void login( String loginCredentials )
+        {
+            try
+            {
+                SwgohAPIToken token = fetchToken( loginCredentials );
+                expiredMillis = System.currentTimeMillis() + (token.expires_in * 1000);
+                access_token = token.access_token;
+            }
+            catch ( Throwable exception )
+            {
+                throw new SwgohAPIException( "Unable to authorize with API.", exception );
+            }
+        }
+
+        private SwgohAPIToken fetchToken( String loginCredentials ) throws IOException
+        {
+            byte[] postData = loginCredentials.getBytes( StandardCharsets.UTF_8 );
+            HttpURLConnection connection = createConnection( API.signin, postData );
+
+            try( DataOutputStream outputStream = new DataOutputStream( connection.getOutputStream() ) )
+            {
+                outputStream.write( postData );
+            }
+
+            return GSON.fromJson( new InputStreamReader( connection.getInputStream() ), SwgohAPIToken.class );
+        }
+
+        private URL getUrl() throws MalformedURLException
+        {
+            return new URL( URL_BASE + path );
         }
     }
 
     SwgohAPIClient( SwgohAPISettings settings )
     {
-        urlBase = String.format( "%s://%s%s", "http" + (settings.isUsesSSL() ? "s" : ""), settings.getHost(), settings.getPort() );
         loginCredentials = "username=" + settings.getUsername() +
                            "&password=" + settings.getPassword() +
                            "&grant_type=password" +
@@ -58,167 +137,217 @@ public class SwgohAPIClient implements SwgohAPI
     }
 
     @Override
-    public SwgohPlayer getPlayer( int allyCode, PlayerField... fields ) throws IOException
-    {
-        return getPlayer( allyCode, null, fields );
-    }
-
-    @Override
-    public SwgohPlayer getPlayer( int allyCode, Language language, PlayerField... fields ) throws IOException
-    {
-        return GSON.fromJson( getPlayerJSON( allyCode, language, fields ), SwgohPlayer.class );
-    }
-
-    @Override
-    public String getPlayerJSON( int allyCode, PlayerField... fields ) throws IOException
-    {
-        return getPlayerJSON( allyCode, null, fields );
-    }
-
-    @Override
-    public String getPlayerJSON( int allyCode, Language language, PlayerField... fields ) throws IOException
-    {
-        return getPlayersJSON( new int[]{allyCode}, language, fields );
-    }
-
-    @Override
-    public List<SwgohPlayer> getPlayers( int[] allyCodes, PlayerField... fields ) throws IOException
-    {
-        return getPlayers( allyCodes, null, fields );
-    }
-
-    @Override
-    public List<SwgohPlayer> getPlayers( int[] allyCodes, Language language, PlayerField... fields ) throws IOException
-    {
-        return GSON.fromJson( getPlayersJSON( allyCodes, language, fields ), new TypeToken<List<SwgohPlayer>>(){}.getType() );
-    }
-
-    @Override
-    public String getPlayersJSON( int[] allyCodes, PlayerField... fields ) throws IOException
-    {
-        return getPlayersJSON( allyCodes, null, fields );
-    }
-
-    @Override
-    public String getPlayersJSON( int[] allyCodes, Language language, PlayerField... fields ) throws IOException
+    public String getPlayers( int[] allyCodes, Boolean enums, Language language, PlayerField... fields ) throws IOException
     {
         Map<String, Object> payload = new HashMap<>();
         payload.put( "allycodes", allyCodes );
+
+        if ( enums != null )
+        {
+            payload.put( "enums", enums );
+        }
+
         if ( language != null )
         {
             payload.put( "language", language.getSwgohCode() );
         }
-        if ( fields != null && fields.length > 0 )
-        {
-            Map<String, Integer> fieldsMap = new HashMap<>();
-            for ( PlayerField field : fields )
-            {
-                fieldsMap.put( field.name(), 1 );
-            }
-            payload.put( "project", fieldsMap );
-        }
 
-        return callApi( API.player.getUrl( urlBase ), payload );
+        createProjection( payload, fields );
+
+        return API.player.call( loginCredentials, payload );
     }
 
     @Override
-    public SwgohGuild getGuild( int allyCode, GuildField... fields ) throws IOException
-    {
-        return getGuild( allyCode, null, fields );
-    }
-
-    @Override
-    public SwgohGuild getGuild( int allyCode, Language language, GuildField... fields ) throws IOException
-    {
-        return GSON.fromJson( getGuildJSON( allyCode, language, fields), SwgohGuild.class );
-    }
-
-    @Override
-    public String getGuildJSON( int allyCode, GuildField... fields ) throws IOException
-    {
-        return getGuildJSON( allyCode, null, fields );
-    }
-
-    @Override
-    public String getGuildJSON( int allyCode, Language language, GuildField... fields ) throws IOException
+    public String getGuild( int allyCode, Boolean enums, Language language, GuildField... fields ) throws IOException
     {
         Map<String, Object> payload = new HashMap<>();
         payload.put( "allycode", allyCode );
+
+        if ( enums != null )
+        {
+            payload.put( "enums", enums );
+        }
+
         if ( language != null )
         {
             payload.put( "language", language.getSwgohCode() );
         }
-        if ( fields != null && fields.length > 0 )
+
+        createProjection( payload, fields );
+
+        return API.guild.call( loginCredentials, payload );
+    }
+
+    @Override
+    public String getLargeGuild( int allyCode, Boolean enums, Language language, GuildField... fields ) throws IOException
+    {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put( "allycode", allyCode );
+        payload.put( "roster", true );
+
+        if ( enums != null )
         {
-            Map<String, Integer> fieldsMap = new HashMap<>();
-            for ( GuildField field : fields )
-            {
-                fieldsMap.put( field.name(), 1 );
-            }
-            payload.put( "project", fieldsMap );
+            payload.put( "enums", enums );
         }
 
-        return callApi( API.guild.getUrl( urlBase ), payload );
+        if ( language != null )
+        {
+            payload.put( "language", language.getSwgohCode() );
+        }
+
+        createProjection( payload, fields );
+
+        return API.guild.call( loginCredentials, payload );
     }
 
     @Override
-    public Map<String, List<SwgohPlayerUnit>> getUnits( int[] allyCodes ) throws IOException
+    public String getGuildUnits( int allyCode, boolean includeMods, Boolean enums, Language language, GuildField... fields ) throws IOException
     {
-        return getUnits( allyCodes, true );
+        Map<String, Object> payload = new HashMap<>();
+        payload.put( "allycode", allyCode );
+        payload.put( "roster", true );
+        payload.put( "units", true );
+        payload.put( "mods", includeMods );
+
+        if ( enums != null )
+        {
+            payload.put( "enums", enums );
+        }
+
+        if ( language != null )
+        {
+            payload.put( "language", language.getSwgohCode() );
+        }
+
+        createProjection( payload, fields );
+
+        return API.guild.call( loginCredentials, payload );
     }
 
     @Override
-    public Map<String, List<SwgohPlayerUnit>> getUnits( int[] allyCodes, boolean includeMods ) throws IOException
-    {
-        return GSON.fromJson( getUnitsJSON( allyCodes, includeMods ), new TypeToken<Map<String, List<SwgohPlayerUnit>>>(){}.getType() );
-    }
-
-    @Override
-    public String getUnitsJSON( int[] allyCodes ) throws IOException
-    {
-        return getUnitsJSON( allyCodes, true );
-    }
-
-    @Override
-    public String getUnitsJSON( int[] allyCodes, boolean includeMods ) throws IOException
+    public String getUnits( int[] allyCodes, boolean includeMods, Boolean enums, Language language, UnitsField... fields ) throws IOException
     {
         Map<String, Object> payload = new HashMap<>();
         payload.put( "allycode", allyCodes );
         payload.put( "mods", includeMods );
-        return callApi( API.units.getUrl( urlBase ), payload );
-    }
 
-    @Override
-    public String getSupportData( Collection collection, String... fields ) throws IOException
-    {
-        return getSupportData( collection, null, null, fields );
-    }
+        if ( enums != null )
+        {
+            payload.put( "enums", enums );
+        }
 
-    @Override
-    public String getSupportData( Collection collection, Language language, String... fields ) throws IOException
-    {
-        return getSupportData( collection, null, language, fields );
-    }
-
-    @Override
-    public String getSupportData( Collection collection, Map<String, String> matchCriteria, String... fields ) throws IOException
-    {
-        return getSupportData( collection, matchCriteria, null, fields );
-    }
-
-    @Override
-    public String getSupportData( Collection collection, Map<String, String> matchCriteria, Language language, String... fields ) throws IOException
-    {
-        Map<String, Object> payload = new HashMap<>();
-        payload.put( "collection", collection.name() );
         if ( language != null )
         {
             payload.put( "language", language.getSwgohCode() );
         }
+
+        createProjection( payload, fields );
+
+        return API.units.call( loginCredentials, payload );
+    }
+
+    @Override
+    public String getZetaRecommendations( ZetaRecommendationField... fields ) throws IOException
+    {
+        Map<String, Object> payload = new HashMap<>();
+
+        createProjection( payload, fields );
+
+        return API.zetas.call( loginCredentials, payload );
+    }
+
+    @Override
+    public String getSquadRecommendations( SquadRecommendationField... fields ) throws IOException
+    {
+        Map<String, Object> payload = new HashMap<>();
+
+        createProjection( payload, fields );
+
+        return API.squads.call( loginCredentials, payload );
+    }
+
+    @Override
+    public String getEvents( Boolean enums, Language language, EventField... fields ) throws IOException
+    {
+        Map<String, Object> payload = new HashMap<>();
+
+        if ( enums != null )
+        {
+            payload.put( "enums", enums );
+        }
+
+        if ( language != null )
+        {
+            payload.put( "language", language.getSwgohCode() );
+        }
+
+        createProjection( payload, fields );
+
+        return API.events.call( loginCredentials, payload );
+    }
+
+    @Override
+    public String getBattles( Boolean enums, Language language, BattleField... fields ) throws IOException
+    {
+        Map<String, Object> payload = new HashMap<>();
+
+        if ( enums != null )
+        {
+            payload.put( "enums", enums );
+        }
+
+        if ( language != null )
+        {
+            payload.put( "language", language.getSwgohCode() );
+        }
+
+        createProjection( payload, fields );
+
+        return API.battles.call( loginCredentials, payload );
+    }
+
+    @Override
+    public String getSupportData( Collection collection, Map<String, Object> matchCriteria, Boolean enums, Language language, String... fields ) throws IOException
+    {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put( "collection", collection.name() );
+
+        if ( enums != null )
+        {
+            payload.put( "enums", enums );
+        }
+
+        if ( language != null )
+        {
+            payload.put( "language", language.getSwgohCode() );
+        }
+
         if ( matchCriteria != null )
         {
             payload.put( "match", matchCriteria );
         }
+
+        createProjection( payload, fields );
+
+        return API.data.call( loginCredentials, payload );
+    }
+
+    private void createProjection( Map<String, Object> payload, Enum... fields )
+    {
+        if ( fields != null && fields.length > 0 )
+        {
+            List<String> stringFields = new ArrayList<>();
+            for ( Enum field : fields )
+            {
+                stringFields.add( field.name() );
+            }
+
+            createProjection( payload, stringFields.toArray( new String[]{} ) );
+        }
+    }
+
+    private void createProjection( Map<String, Object> payload, String... fields )
+    {
         if ( fields != null && fields.length > 0 )
         {
             Map<String, Integer> fieldsMap = new HashMap<>();
@@ -228,82 +357,5 @@ public class SwgohAPIClient implements SwgohAPI
             }
             payload.put( "project", fieldsMap );
         }
-
-        return callApi( API.data.getUrl( urlBase ), payload );
-    }
-
-    private void login()
-    {
-        try
-        {
-            access_token = fetchToken().access_token;
-        }
-        catch ( Throwable exception )
-        {
-            throw new SwgohAPIException( exception );
-        }
-    }
-
-    private Token fetchToken() throws IOException
-    {
-        byte[] postData = loginCredentials.getBytes( StandardCharsets.UTF_8 );
-        URL url = API.signin.getUrl( urlBase );
-        HttpURLConnection connection = createConnection( url, postData );
-
-        try( DataOutputStream outputStream = new DataOutputStream( connection.getOutputStream() ) )
-        {
-            outputStream.write( postData );
-        }
-
-        return GSON.fromJson( new InputStreamReader( connection.getInputStream() ), Token.class );
-    }
-
-    private String callApi( URL url, Map<String, Object> payload ) throws IOException
-    {
-        try ( BufferedReader br = new BufferedReader( new InputStreamReader( getAuthorizedConnection( url, payload ).getInputStream() ) ) )
-        {
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ( ( line = br.readLine() ) != null )
-            {
-                sb.append( line ).append( "\n" );
-            }
-            return sb.toString();
-        }
-    }
-
-    private HttpURLConnection getAuthorizedConnection( URL url, Map<String, Object> payload ) throws IOException
-    {
-        if ( access_token == null )
-        {
-            login();
-        }
-
-        byte[] postData = GSON.toJson( payload ).getBytes( StandardCharsets.UTF_8 );
-        HttpURLConnection connection = createConnection( url, postData );
-        connection.setRequestProperty( "Authorization", "Bearer " + access_token );
-        connection.setRequestProperty( "Content-Type", "application/json" );
-
-        try( DataOutputStream outputStream = new DataOutputStream( connection.getOutputStream() ) )
-        {
-            outputStream.write( postData );
-        }
-
-        return connection;
-    }
-
-    private HttpURLConnection createConnection( URL url, byte[] postData ) throws IOException
-    {
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod( "POST" );
-
-        connection.setDoOutput( true );
-        connection.setInstanceFollowRedirects( false );
-        connection.setUseCaches( false );
-        connection.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded" );
-        connection.setRequestProperty( "charset", "utf-8" );
-        connection.setRequestProperty( "Content-Length", postData.length+"" );
-
-        return connection;
     }
 }

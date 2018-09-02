@@ -16,4 +16,9 @@ public class SwgohAPIException extends RuntimeException
     {
         super( cause );
     }
+
+    public SwgohAPIException( String errorMessage, Throwable cause )
+    {
+        super( errorMessage, cause );
+    }
 }

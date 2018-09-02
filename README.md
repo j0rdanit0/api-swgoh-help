@@ -1,5 +1,7 @@
 # api-swgoh-help [![Maven Central](https://img.shields.io/maven-central/v/help.swgoh.api/swgoh-api-connector.svg?style=flat-square)](https://mvnrepository.com/artifact/help.swgoh.api/swgoh-api-connector)
-Java client wrapper for the API at https://apiv2.swgoh.help
+Java client wrapper for the API at https://api.swgoh.help
+
+Due to the extreme versatility of this API and the available options that are given that modify the response structures, all of the responses returned by each endpoint will be raw JSON in the form of a `java.lang.String` for now. The consumer of this API client is then free to parse the data into whatever form they choose.
 
 # Usage
 Include the swgoh-api-connector artifact:
@@ -33,14 +35,14 @@ Request for a player profile by ally code:
 ```java
 //single player
 int allyCode = 123456789;
-SwgohPlayer player = api.getPlayer( allyCode );
+String player = api.getPlayer( allyCode );
 ```
 ```java
 //multiple players
 int allyCode = 123456789;
 int otherAllyCode = 987654321;
 int[] allyCodes = new int[] { allyCode, otherAllyCode };
-List<SwgohPlayer> players = api.getPlayers( allyCodes );
+String players = api.getPlayers( allyCodes );
 ```
 ```java
 //only return certain fields in the response
@@ -56,12 +58,12 @@ SwgohPlayer player = api.getPlayer(
 Request guild info by ally code:
 ```java
 int allyCode = 123456789;
-SwgohGuild guild = api.getGuild( allyCode );
+String guild = api.getGuild( allyCode );
 ```
 ```java
 //only return certain fields in the response
 int allyCode = 123456789;
-SwgohGuild guild = api.getGuild( 
+String guild = api.getGuild( 
         allyCode,
         SwgohAPI.GuildField.name,
         SwgohAPI.GuildField.gp,
@@ -70,17 +72,21 @@ SwgohGuild guild = api.getGuild(
 );
 ```
 
-Want to receive the raw JSON and parse it yourself? Each typed endpoint is overloaded with a -JSON postfix that simply returns a JSON String.
-
-Request various other kinds of data, in JSON format:
+Request various other kinds of data:
 ```java
+//no filtering, large response
 String unitsJson = api.getSupportData( SwgohAPI.Collection.unitsList );
 ```
 ```java
-//specify custom filtering criteria
-Map<String, String> matchCriteria = new HashMap<>();
+//specify custom filtering criteria for a smaller response
+Map<String, Object> matchCriteria = new HashMap<>();
 matchCriteria.put( "baseId", "GREEDO" );
-String greedoJson = api.getSupportData( SwgohAPI.Collection.unitsList, matchCriteria );
+matchCriteria.put( "rarity", 7 );
+String greedoJson = api.getSupportData( SwgohAPI.Collection.unitsList,
+        matchCriteria,
+        SwgohAPI.Language.English,
+        "nameKey", "combatType", "descKey", "thumbnailName", "baseId"
+);
 ```
 ...and so much more! Please reference SwgohAPI.Collection for a list of all available data collections.
 
