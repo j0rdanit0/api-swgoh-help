@@ -19,7 +19,7 @@ import java.util.concurrent.CompletableFuture;
 public class SwgohAPIClient implements SwgohAPI
 {
     private final String loginCredentials;
-    private final Language defaultLanguage;
+    private final String defaultLanguage;
     private final Boolean defaultEnums;
 
     SwgohAPIClient( SwgohAPISettings settings )
@@ -29,7 +29,7 @@ public class SwgohAPIClient implements SwgohAPI
                            "&grant_type=password" +
                            "&client_id=abc" +
                            "&client_secret=123";
-        defaultLanguage = settings.getDefaultLanguage();
+        defaultLanguage = settings.getDefaultLanguage() == null ? null : settings.getDefaultLanguage().getSwgohCode();
         defaultEnums = settings.getDefaultEnums();
     }
 
