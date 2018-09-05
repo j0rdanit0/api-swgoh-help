@@ -35,6 +35,30 @@ public class SwgohAPIBuilder
     }
 
     /**
+     * Defines the default language to use if none is specified at the time of the request.
+     *
+     * @param language  The language to use for all API requests, unless overridden at the call level.
+     * @return The builder instance.
+     */
+    public SwgohAPIBuilder withDefaultLanguage( SwgohAPI.Language language )
+    {
+        settings.setDefaultLanguage( language );
+        return this;
+    }
+
+    /**
+     * Defines the default behavior for the enums parameter if none is specified at the time of the request.
+     *
+     * @param enums  The default value of the enums parameter to use for all API requests, unless overridden at the call level.
+     * @return The builder instance.
+     */
+    public SwgohAPIBuilder withDefaultEnums( boolean enums )
+    {
+        settings.setDefaultEnums( enums );
+        return this;
+    }
+
+    /**
      * Validate the {@link SwgohAPISettings} object and construct a new {@link SwgohAPIClient} instance with it.
      *
      * @return The new client with the configuration specified by this builder.

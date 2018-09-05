@@ -4,6 +4,8 @@ public class SwgohAPISettings
 {
     private String username;
     private String password;
+    private SwgohAPI.Language defaultLanguage;
+    private Boolean defaultEnums;
 
     public String getUsername()
     {
@@ -23,6 +25,26 @@ public class SwgohAPISettings
     public void setPassword( String password )
     {
         this.password = password;
+    }
+
+    public SwgohAPI.Language getDefaultLanguage()
+    {
+        return defaultLanguage;
+    }
+
+    public void setDefaultLanguage( SwgohAPI.Language defaultLanguage )
+    {
+        this.defaultLanguage = defaultLanguage;
+    }
+
+    public Boolean getDefaultEnums()
+    {
+        return defaultEnums;
+    }
+
+    public void setDefaultEnums( Boolean defaultEnums )
+    {
+        this.defaultEnums = defaultEnums;
     }
 
     public void validate()

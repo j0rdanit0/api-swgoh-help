@@ -14,10 +14,24 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class SwgohAPIClient implements SwgohAPI
 {
     private final String loginCredentials;
+    private final Language defaultLanguage;
+    private final Boolean defaultEnums;
+
+    SwgohAPIClient( SwgohAPISettings settings )
+    {
+        loginCredentials = "username=" + settings.getUsername() +
+                           "&password=" + settings.getPassword() +
+                           "&grant_type=password" +
+                           "&client_id=abc" +
+                           "&client_secret=123";
+        defaultLanguage = settings.getDefaultLanguage();
+        defaultEnums = settings.getDefaultEnums();
+    }
 
     public enum API
     {
@@ -35,7 +49,7 @@ public class SwgohAPIClient implements SwgohAPI
         private static final String URL_BASE = "https://api.swgoh.help";
         private static final Gson GSON = new Gson();
 
-        private volatile String access_token;
+        private static final SwgohAPIToken TOKEN = new SwgohAPIToken();
         private volatile long expiredMillis;
 
         private final String path;
@@ -45,7 +59,21 @@ public class SwgohAPIClient implements SwgohAPI
             this.path = path;
         }
 
-        public String call( String loginCredentials, Map<String, Object> payload ) throws IOException
+        public CompletableFuture<String> call( String loginCredentials, Map<String, Object> payload )
+        {
+            return CompletableFuture.supplyAsync( () -> {
+                try
+                {
+                    return getJson( loginCredentials, payload );
+                }
+                catch ( Exception exception )
+                {
+                    throw new SwgohAPIException( "Unable to complete request.", exception );
+                }
+            } );
+        }
+
+        private String getJson( String loginCredentials, Map<String, Object> payload ) throws IOException
         {
             try ( BufferedReader br = new BufferedReader( new InputStreamReader( getAuthorizedConnection( loginCredentials, payload ).getInputStream() ) ) )
             {
@@ -61,14 +89,20 @@ public class SwgohAPIClient implements SwgohAPI
 
         private HttpURLConnection getAuthorizedConnection( String loginCredentials, Map<String, Object> payload ) throws IOException
         {
-            if ( access_token == null || System.currentTimeMillis() > (expiredMillis - 10) )
+            if ( TOKEN.access_token == null || System.currentTimeMillis() > (expiredMillis - 10) )
             {
-                login( loginCredentials );
+                synchronized ( TOKEN )
+                {
+                    if ( TOKEN.access_token == null || System.currentTimeMillis() > (expiredMillis - 10) )
+                    {
+                        login( loginCredentials );
+                    }
+                }
             }
 
             byte[] postData = GSON.toJson( payload ).getBytes( StandardCharsets.UTF_8 );
             HttpURLConnection connection = createConnection( this, postData );
-            connection.setRequestProperty( "Authorization", "Bearer " + access_token );
+            connection.setRequestProperty( "Authorization", "Bearer " + TOKEN.access_token );
             connection.setRequestProperty( "Content-Type", "application/json" );
 
             try( DataOutputStream outputStream = new DataOutputStream( connection.getOutputStream() ) )
@@ -100,7 +134,7 @@ public class SwgohAPIClient implements SwgohAPI
             {
                 SwgohAPIToken token = fetchToken( loginCredentials );
                 expiredMillis = System.currentTimeMillis() + (token.expires_in * 1000);
-                access_token = token.access_token;
+                TOKEN.access_token = token.access_token;
             }
             catch ( Throwable exception )
             {
@@ -127,30 +161,13 @@ public class SwgohAPIClient implements SwgohAPI
         }
     }
 
-    SwgohAPIClient( SwgohAPISettings settings )
-    {
-        loginCredentials = "username=" + settings.getUsername() +
-                           "&password=" + settings.getPassword() +
-                           "&grant_type=password" +
-                           "&client_id=abc" +
-                           "&client_secret=123";
-    }
-
     @Override
-    public String getPlayers( int[] allyCodes, Boolean enums, Language language, PlayerField... fields ) throws IOException
+    public CompletableFuture<String> getPlayers( int[] allyCodes, Boolean enums, Language language, PlayerField... fields )
     {
         Map<String, Object> payload = new HashMap<>();
         payload.put( "allycodes", allyCodes );
-
-        if ( enums != null )
-        {
-            payload.put( "enums", enums );
-        }
-
-        if ( language != null )
-        {
-            payload.put( "language", language.getSwgohCode() );
-        }
+        payload.put( "enums", enums == null ? defaultEnums : enums );
+        payload.put( "language", language == null ? defaultLanguage : language.getSwgohCode() );
 
         createProjection( payload, fields );
 
@@ -158,20 +175,12 @@ public class SwgohAPIClient implements SwgohAPI
     }
 
     @Override
-    public String getGuild( int allyCode, Boolean enums, Language language, GuildField... fields ) throws IOException
+    public CompletableFuture<String> getGuild( int allyCode, Boolean enums, Language language, GuildField... fields )
     {
         Map<String, Object> payload = new HashMap<>();
         payload.put( "allycode", allyCode );
-
-        if ( enums != null )
-        {
-            payload.put( "enums", enums );
-        }
-
-        if ( language != null )
-        {
-            payload.put( "language", language.getSwgohCode() );
-        }
+        payload.put( "enums", enums == null ? defaultEnums : enums );
+        payload.put( "language", language == null ? defaultLanguage : language.getSwgohCode() );
 
         createProjection( payload, fields );
 
@@ -179,21 +188,13 @@ public class SwgohAPIClient implements SwgohAPI
     }
 
     @Override
-    public String getLargeGuild( int allyCode, Boolean enums, Language language, GuildField... fields ) throws IOException
+    public CompletableFuture<String> getLargeGuild( int allyCode, Boolean enums, Language language, GuildField... fields )
     {
         Map<String, Object> payload = new HashMap<>();
         payload.put( "allycode", allyCode );
         payload.put( "roster", true );
-
-        if ( enums != null )
-        {
-            payload.put( "enums", enums );
-        }
-
-        if ( language != null )
-        {
-            payload.put( "language", language.getSwgohCode() );
-        }
+        payload.put( "enums", enums == null ? defaultEnums : enums );
+        payload.put( "language", language == null ? defaultLanguage : language.getSwgohCode() );
 
         createProjection( payload, fields );
 
@@ -201,23 +202,15 @@ public class SwgohAPIClient implements SwgohAPI
     }
 
     @Override
-    public String getGuildUnits( int allyCode, boolean includeMods, Boolean enums, Language language, GuildField... fields ) throws IOException
+    public CompletableFuture<String> getGuildUnits( int allyCode, boolean includeMods, Boolean enums, Language language, GuildField... fields )
     {
         Map<String, Object> payload = new HashMap<>();
         payload.put( "allycode", allyCode );
         payload.put( "roster", true );
         payload.put( "units", true );
         payload.put( "mods", includeMods );
-
-        if ( enums != null )
-        {
-            payload.put( "enums", enums );
-        }
-
-        if ( language != null )
-        {
-            payload.put( "language", language.getSwgohCode() );
-        }
+        payload.put( "enums", enums == null ? defaultEnums : enums );
+        payload.put( "language", language == null ? defaultLanguage : language.getSwgohCode() );
 
         createProjection( payload, fields );
 
@@ -225,21 +218,13 @@ public class SwgohAPIClient implements SwgohAPI
     }
 
     @Override
-    public String getUnits( int[] allyCodes, boolean includeMods, Boolean enums, Language language, UnitsField... fields ) throws IOException
+    public CompletableFuture<String> getUnits( int[] allyCodes, boolean includeMods, Boolean enums, Language language, UnitsField... fields )
     {
         Map<String, Object> payload = new HashMap<>();
         payload.put( "allycode", allyCodes );
         payload.put( "mods", includeMods );
-
-        if ( enums != null )
-        {
-            payload.put( "enums", enums );
-        }
-
-        if ( language != null )
-        {
-            payload.put( "language", language.getSwgohCode() );
-        }
+        payload.put( "enums", enums == null ? defaultEnums : enums );
+        payload.put( "language", language == null ? defaultLanguage : language.getSwgohCode() );
 
         createProjection( payload, fields );
 
@@ -247,7 +232,7 @@ public class SwgohAPIClient implements SwgohAPI
     }
 
     @Override
-    public String getZetaRecommendations( ZetaRecommendationField... fields ) throws IOException
+    public CompletableFuture<String> getZetaRecommendations( ZetaRecommendationField... fields )
     {
         Map<String, Object> payload = new HashMap<>();
 
@@ -257,7 +242,7 @@ public class SwgohAPIClient implements SwgohAPI
     }
 
     @Override
-    public String getSquadRecommendations( SquadRecommendationField... fields ) throws IOException
+    public CompletableFuture<String> getSquadRecommendations( SquadRecommendationField... fields )
     {
         Map<String, Object> payload = new HashMap<>();
 
@@ -267,19 +252,11 @@ public class SwgohAPIClient implements SwgohAPI
     }
 
     @Override
-    public String getEvents( Boolean enums, Language language, EventField... fields ) throws IOException
+    public CompletableFuture<String> getEvents( Boolean enums, Language language, EventField... fields )
     {
         Map<String, Object> payload = new HashMap<>();
-
-        if ( enums != null )
-        {
-            payload.put( "enums", enums );
-        }
-
-        if ( language != null )
-        {
-            payload.put( "language", language.getSwgohCode() );
-        }
+        payload.put( "enums", enums == null ? defaultEnums : enums );
+        payload.put( "language", language == null ? defaultLanguage : language.getSwgohCode() );
 
         createProjection( payload, fields );
 
@@ -287,19 +264,11 @@ public class SwgohAPIClient implements SwgohAPI
     }
 
     @Override
-    public String getBattles( Boolean enums, Language language, BattleField... fields ) throws IOException
+    public CompletableFuture<String> getBattles( Boolean enums, Language language, BattleField... fields )
     {
         Map<String, Object> payload = new HashMap<>();
-
-        if ( enums != null )
-        {
-            payload.put( "enums", enums );
-        }
-
-        if ( language != null )
-        {
-            payload.put( "language", language.getSwgohCode() );
-        }
+        payload.put( "enums", enums == null ? defaultEnums : enums );
+        payload.put( "language", language == null ? defaultLanguage : language.getSwgohCode() );
 
         createProjection( payload, fields );
 
@@ -307,20 +276,12 @@ public class SwgohAPIClient implements SwgohAPI
     }
 
     @Override
-    public String getSupportData( Collection collection, Map<String, Object> matchCriteria, Boolean enums, Language language, String... fields ) throws IOException
+    public CompletableFuture<String> getSupportData( Collection collection, Map<String, Object> matchCriteria, Boolean enums, Language language, String... fields )
     {
         Map<String, Object> payload = new HashMap<>();
         payload.put( "collection", collection.name() );
-
-        if ( enums != null )
-        {
-            payload.put( "enums", enums );
-        }
-
-        if ( language != null )
-        {
-            payload.put( "language", language.getSwgohCode() );
-        }
+        payload.put( "enums", enums == null ? defaultEnums : enums );
+        payload.put( "language", language == null ? defaultLanguage : language.getSwgohCode() );
 
         if ( matchCriteria != null )
         {

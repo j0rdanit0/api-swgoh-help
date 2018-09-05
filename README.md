@@ -35,30 +35,30 @@ Request for a player profile by ally code:
 ```java
 //single player
 int allyCode = 123456789;
-String player = api.getPlayer( allyCode );
+String player = api.getPlayer( allyCode ).get();
 ```
 ```java
 //multiple players
 int allyCode = 123456789;
 int otherAllyCode = 987654321;
 int[] allyCodes = new int[] { allyCode, otherAllyCode };
-String players = api.getPlayers( allyCodes );
+String players = api.getPlayers( allyCodes ).get();
 ```
 ```java
 //only return certain fields in the response
 int allyCode = 123456789;
-SwgohPlayer player = api.getPlayer( 
+String player = api.getPlayer( 
         allyCode,
         SwgohAPI.PlayerField.name,
         SwgohAPI.PlayerField.allyCode,
         SwgohAPI.PlayerField.roster,
-);
+).get();
 ```
 
 Request guild info by ally code:
 ```java
 int allyCode = 123456789;
-String guild = api.getGuild( allyCode );
+String guild = api.getGuild( allyCode ).get();
 ```
 ```java
 //only return certain fields in the response
@@ -69,13 +69,13 @@ String guild = api.getGuild(
         SwgohAPI.GuildField.gp,
         SwgohAPI.GuildField.roster,
         SwgohAPI.GuildField.updated
-);
+).get();
 ```
 
 Request various other kinds of data:
 ```java
 //no filtering, large response
-String unitsJson = api.getSupportData( SwgohAPI.Collection.unitsList );
+String unitsJson = api.getSupportData( SwgohAPI.Collection.unitsList ).get();
 ```
 ```java
 //specify custom filtering criteria for a smaller response
@@ -86,9 +86,19 @@ String greedoJson = api.getSupportData( SwgohAPI.Collection.unitsList,
         matchCriteria,
         SwgohAPI.Language.English,
         "nameKey", "combatType", "descKey", "thumbnailName", "baseId"
-);
+).get();
 ```
-...and so much more! Please reference SwgohAPI.Collection for a list of all available data collections.
+...and so much more! Please reference `SwgohAPI.Collection` for a list of all available data collections.
+
+# Asynchronous API with CompletableFuture
+Don't want to wait on a response from the API? Set up a callback method using the returned [CompletableFuture](https://www.baeldung.com/java-completablefuture).
+
+```java
+int allyCode = 123456789;
+api.getPlayer( allyCode ).thenAccept( player -> {
+    //do something with player. This will happen in the future, leaving the main thread unblocked
+});
+```
 
 # Language Specification
 To receive data in a supported language, simply pass the specified language into the overloaded method of your choice.
@@ -115,7 +125,7 @@ public class SwgohConfiguration
 }
 ```
 
-And it's as simple as that. Now you can Autowire the API client to your heart's content.
+And it's as simple as that. Now you can `@Autowire` the API client to your heart's content.
 ```java
 @Service
 public class SwgohService
@@ -142,3 +152,6 @@ https://github.com/rayderua/swhelp-api-client
 
 Google App Script:<br/>
 https://github.com/Dragonsight91/api-swgoh-help
+
+Python:<br/>
+https://github.com/platzman/swgoh.help.python
