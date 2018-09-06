@@ -53,7 +53,7 @@ public interface SwgohAPI
      */
     enum PlayerField
     {
-        allyCode, name, level, guildName, stats, roster, arena, updated
+        allyCode, name, level, guildName, guildRefId, stats, roster, arena, updated
     }
 
     /**
@@ -61,7 +61,7 @@ public interface SwgohAPI
      */
     enum GuildField
     {
-        name, desc, members, status, required, bannerColor, bannerLogo, message, gp, raid, roster, updated
+        name, id, desc, members, status, required, bannerColor, bannerLogo, message, gp, raid, roster, updated
     }
 
     /**
@@ -69,7 +69,7 @@ public interface SwgohAPI
      */
     enum UnitsField
     {
-        player, allyCode, starLevel, level, gearLevel, gear, zetas, type, mods, updated
+        player, allyCode, starLevel, level, gearLevel, gear, zetas, type, mods, gp, updated
     }
 
     /**
