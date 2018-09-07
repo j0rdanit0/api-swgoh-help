@@ -1,5 +1,10 @@
-package help.swgoh.api;
+package help.swgoh.api.exception;
 
+/**
+ * Thrown by the API client when an exception occurs.
+ *
+ * @since 1.0.0
+ */
 public class SwgohAPIException extends RuntimeException
 {
     public SwgohAPIException()
@@ -9,7 +14,7 @@ public class SwgohAPIException extends RuntimeException
 
     public SwgohAPIException( String errorMessage )
     {
-        super( "! " + errorMessage );
+        super( errorMessage );
     }
 
     public SwgohAPIException( Throwable cause )

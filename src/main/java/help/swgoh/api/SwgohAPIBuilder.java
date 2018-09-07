@@ -1,5 +1,7 @@
 package help.swgoh.api;
 
+import help.swgoh.api.exception.SwgohAPIException;
+
 /**
  * This builder's sole purpose is to compile together the elements of a {@link SwgohAPISettings} object, which will be used
  * to create an instance of the {@link SwgohAPI} interface.

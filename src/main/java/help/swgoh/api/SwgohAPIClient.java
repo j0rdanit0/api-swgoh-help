@@ -1,6 +1,9 @@
 package help.swgoh.api;
 
 import com.google.gson.Gson;
+import help.swgoh.api.exception.SwgohAPIException;
+import help.swgoh.api.exception.SwgohAPIRateLimitException;
+import help.swgoh.api.response.RegistrationResponse;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -11,6 +14,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,17 +22,15 @@ import java.util.concurrent.CompletableFuture;
 
 public class SwgohAPIClient implements SwgohAPI
 {
-    private final String loginCredentials;
+    private final String username;
+    private final String password;
     private final String defaultLanguage;
     private final Boolean defaultEnums;
 
     SwgohAPIClient( SwgohAPISettings settings )
     {
-        loginCredentials = "username=" + settings.getUsername() +
-                           "&password=" + settings.getPassword() +
-                           "&grant_type=password" +
-                           "&client_id=abc" +
-                           "&client_secret=123";
+        username = settings.getUsername();
+        password = settings.getPassword();
         defaultLanguage = settings.getDefaultLanguage() == null ? null : settings.getDefaultLanguage().getSwgohCode();
         defaultEnums = settings.getDefaultEnums();
     }
@@ -44,13 +46,12 @@ public class SwgohAPIClient implements SwgohAPI
         squads( "/swgoh/squads" ),
         events( "/swgoh/events" ),
         battles( "/swgoh/battles" ),
+        registration( "/registration" ),
         ;
 
         private static final String URL_BASE = "https://api.swgoh.help";
         private static final Gson GSON = new Gson();
-
         private static final SwgohAPIToken TOKEN = new SwgohAPIToken();
-        private volatile long expiredMillis;
 
         private final String path;
 
@@ -59,12 +60,12 @@ public class SwgohAPIClient implements SwgohAPI
             this.path = path;
         }
 
-        public CompletableFuture<String> call( String loginCredentials, Map<String, Object> payload )
+        public CompletableFuture<String> call( String username, String password, Map<String, Object> payload )
         {
             return CompletableFuture.supplyAsync( () -> {
                 try
                 {
-                    return getJson( loginCredentials, payload );
+                    return getJson( username, password, payload );
                 }
                 catch ( Exception exception )
                 {
@@ -73,29 +74,55 @@ public class SwgohAPIClient implements SwgohAPI
             } );
         }
 
-        private String getJson( String loginCredentials, Map<String, Object> payload ) throws IOException
+        public <T> CompletableFuture<T> call( String username, String password, Map<String, Object> payload, Class<T> resultType )
         {
-            try ( BufferedReader br = new BufferedReader( new InputStreamReader( getAuthorizedConnection( loginCredentials, payload ).getInputStream() ) ) )
-            {
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ( ( line = br.readLine() ) != null )
+            return CompletableFuture.supplyAsync( () -> {
+                try
                 {
-                    sb.append( line ).append( "\n" );
+                    return GSON.fromJson( getJson( username, password, payload ), resultType );
                 }
-                return sb.toString();
+                catch ( Exception exception )
+                {
+                    throw new SwgohAPIException( "Unable to complete request.", exception );
+                }
+            } );
+        }
+
+        private String getJson( String username, String password, Map<String, Object> payload ) throws IOException
+        {
+            try
+            {
+                try ( BufferedReader br = new BufferedReader( new InputStreamReader( getAuthorizedConnection( username, password, payload ).getInputStream() ) ) )
+                {
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while ( ( line = br.readLine() ) != null )
+                    {
+                        sb.append( line ).append( "\n" );
+                    }
+                    return sb.toString();
+                }
+            }
+            catch ( IOException ioException )
+            {
+                if ( ioException.getMessage() != null && ioException.getMessage().contains( "429" ) )
+                {
+                    throw new SwgohAPIRateLimitException( ioException );
+                }
+
+                throw ioException;
             }
         }
 
-        private HttpURLConnection getAuthorizedConnection( String loginCredentials, Map<String, Object> payload ) throws IOException
+        private HttpURLConnection getAuthorizedConnection( String username, String password, Map<String, Object> payload ) throws IOException
         {
-            if ( TOKEN.access_token == null || System.currentTimeMillis() > (expiredMillis - 10) )
+            if ( TOKEN.access_token == null )
             {
                 synchronized ( TOKEN )
                 {
-                    if ( TOKEN.access_token == null || System.currentTimeMillis() > (expiredMillis - 10) )
+                    if ( TOKEN.access_token == null )
                     {
-                        login( loginCredentials );
+                        login( username, password );
                     }
                 }
             }
@@ -113,7 +140,7 @@ public class SwgohAPIClient implements SwgohAPI
             return connection;
         }
 
-        private HttpURLConnection createConnection( API api, byte[] postData ) throws IOException
+        private static HttpURLConnection createConnection( API api, byte[] postData ) throws IOException
         {
             HttpURLConnection connection = (HttpURLConnection) api.getUrl().openConnection();
             connection.setRequestMethod( "POST" );
@@ -128,12 +155,16 @@ public class SwgohAPIClient implements SwgohAPI
             return connection;
         }
 
-        private void login( String loginCredentials )
+        public static void login( String username, String password )
         {
             try
             {
-                SwgohAPIToken token = fetchToken( loginCredentials );
-                expiredMillis = System.currentTimeMillis() + (token.expires_in * 1000);
+                SwgohAPIToken token = fetchToken( username, password );
+
+                CompletableFuture.runAsync( () -> {
+                    try { Thread.sleep( (token.expires_in - 1) * 1000 ); } catch ( Exception exception ) {}
+                } ).thenRun( () -> TOKEN.access_token = null );
+
                 TOKEN.access_token = token.access_token;
             }
             catch ( Throwable exception )
@@ -142,8 +173,14 @@ public class SwgohAPIClient implements SwgohAPI
             }
         }
 
-        private SwgohAPIToken fetchToken( String loginCredentials ) throws IOException
+        private static SwgohAPIToken fetchToken( String username, String password ) throws IOException
         {
+            String loginCredentials = "username=" + username +
+                                      "&password=" + password +
+                                      "&grant_type=password" +
+                                      "&client_id=abc" +
+                                      "&client_secret=123";
+
             byte[] postData = loginCredentials.getBytes( StandardCharsets.UTF_8 );
             HttpURLConnection connection = createConnection( API.signin, postData );
 
@@ -162,7 +199,7 @@ public class SwgohAPIClient implements SwgohAPI
     }
 
     @Override
-    public CompletableFuture<String> getPlayers( int[] allyCodes, Boolean enums, Language language, PlayerField... fields )
+    public CompletableFuture<String> getPlayers( List<Integer> allyCodes, Boolean enums, Language language, PlayerField... fields )
     {
         Map<String, Object> payload = new HashMap<>();
         payload.put( "allycodes", allyCodes );
@@ -171,7 +208,7 @@ public class SwgohAPIClient implements SwgohAPI
 
         createProjection( payload, fields );
 
-        return API.player.call( loginCredentials, payload );
+        return API.player.call( username, password, payload );
     }
 
     @Override
@@ -184,7 +221,7 @@ public class SwgohAPIClient implements SwgohAPI
 
         createProjection( payload, fields );
 
-        return API.guild.call( loginCredentials, payload );
+        return API.guild.call( username, password, payload );
     }
 
     @Override
@@ -198,7 +235,7 @@ public class SwgohAPIClient implements SwgohAPI
 
         createProjection( payload, fields );
 
-        return API.guild.call( loginCredentials, payload );
+        return API.guild.call( username, password, payload );
     }
 
     @Override
@@ -214,11 +251,11 @@ public class SwgohAPIClient implements SwgohAPI
 
         createProjection( payload, fields );
 
-        return API.guild.call( loginCredentials, payload );
+        return API.guild.call( username, password, payload );
     }
 
     @Override
-    public CompletableFuture<String> getUnits( int[] allyCodes, boolean includeMods, Boolean enums, Language language, UnitsField... fields )
+    public CompletableFuture<String> getUnits( List<Integer> allyCodes, boolean includeMods, Boolean enums, Language language, UnitsField... fields )
     {
         Map<String, Object> payload = new HashMap<>();
         payload.put( "allycode", allyCodes );
@@ -228,7 +265,7 @@ public class SwgohAPIClient implements SwgohAPI
 
         createProjection( payload, fields );
 
-        return API.units.call( loginCredentials, payload );
+        return API.units.call( username, password, payload );
     }
 
     @Override
@@ -238,7 +275,7 @@ public class SwgohAPIClient implements SwgohAPI
 
         createProjection( payload, fields );
 
-        return API.zetas.call( loginCredentials, payload );
+        return API.zetas.call( username, password, payload );
     }
 
     @Override
@@ -248,7 +285,7 @@ public class SwgohAPIClient implements SwgohAPI
 
         createProjection( payload, fields );
 
-        return API.squads.call( loginCredentials, payload );
+        return API.squads.call( username, password, payload );
     }
 
     @Override
@@ -260,7 +297,7 @@ public class SwgohAPIClient implements SwgohAPI
 
         createProjection( payload, fields );
 
-        return API.events.call( loginCredentials, payload );
+        return API.events.call( username, password, payload );
     }
 
     @Override
@@ -272,7 +309,7 @@ public class SwgohAPIClient implements SwgohAPI
 
         createProjection( payload, fields );
 
-        return API.battles.call( loginCredentials, payload );
+        return API.battles.call( username, password, payload );
     }
 
     @Override
@@ -290,7 +327,44 @@ public class SwgohAPIClient implements SwgohAPI
 
         createProjection( payload, fields );
 
-        return API.data.call( loginCredentials, payload );
+        return API.data.call( username, password, payload );
+    }
+
+    @Override
+    public CompletableFuture<RegistrationResponse> register( Map<Integer, String> allyCodeDiscordIdMappings )
+    {
+        Map<String, Object> payload = new HashMap<>();
+
+        List<List<Object>> mappings = new ArrayList<>();
+        for ( Integer allyCode : allyCodeDiscordIdMappings.keySet() )
+        {
+            List<Object> mapping = new ArrayList<>();
+            mapping.add( allyCode );
+            mapping.add( allyCodeDiscordIdMappings.get( allyCode ) );
+            mappings.add( mapping );
+        }
+
+        payload.put( "put", mappings );
+
+        return API.registration.call( username, password, payload, RegistrationResponse.class );
+    }
+
+    @Override
+    public CompletableFuture<RegistrationResponse> getRegistrationByAllyCode( List<Integer> allyCodes )
+    {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put( "get", allyCodes );
+
+        return API.registration.call( username, password, payload, RegistrationResponse.class );
+    }
+
+    @Override
+    public CompletableFuture<RegistrationResponse> getRegistrationByDiscordId( List<String> discordIds )
+    {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put( "get", discordIds );
+
+        return API.registration.call( username, password, payload, RegistrationResponse.class );
     }
 
     private void createProjection( Map<String, Object> payload, Enum... fields )

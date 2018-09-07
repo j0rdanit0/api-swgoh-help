@@ -1,5 +1,7 @@
 package help.swgoh.api;
 
+import help.swgoh.api.exception.SwgohAPIException;
+
 public class SwgohAPISettings
 {
     private String username;
@@ -56,6 +58,15 @@ public class SwgohAPISettings
         if ( password == null || "".equals( password ) )
         {
             throw new SwgohAPIException( "password is required." );
+        }
+
+        try
+        {
+            SwgohAPIClient.API.login( username, password );
+        }
+        catch ( Exception exception )
+        {
+            throw new SwgohAPIException( "username and/or password are invalid." );
         }
     }
 }

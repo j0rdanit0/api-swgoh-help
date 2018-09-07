@@ -1,5 +1,9 @@
 package help.swgoh.api;
 
+import help.swgoh.api.response.RegistrationResponse;
+
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -49,7 +53,7 @@ public interface SwgohAPI
     }
 
     /**
-     * Toggleable fields for the {@link #getPlayers(int[], Boolean, Language, PlayerField...)} endpoints.
+     * Toggleable fields for the {@link #getPlayers(List, Boolean, Language, PlayerField...)} endpoints.
      */
     enum PlayerField
     {
@@ -65,7 +69,7 @@ public interface SwgohAPI
     }
 
     /**
-     * Toggleable fields for the {@link #getUnits(int[], boolean, Boolean, Language, UnitsField...)} endpoints.
+     * Toggleable fields for the {@link #getUnits(List, boolean, Boolean, Language, UnitsField...)} endpoints.
      */
     enum UnitsField
     {
@@ -133,22 +137,22 @@ public interface SwgohAPI
      * @param fields Optional projection of {@link PlayerField}s you want returned. If no fields are specified, all fields will be returned.
      * @return player data by individual or group of ally codes.
      */
-    CompletableFuture<String> getPlayers( int[] allyCodes, Boolean enums, Language language, PlayerField... fields );
-    default CompletableFuture<String> getPlayers( int[] allyCodes, Language language, PlayerField... fields )
+    CompletableFuture<String> getPlayers( List<Integer> allyCodes, Boolean enums, Language language, PlayerField... fields );
+    default CompletableFuture<String> getPlayers( List<Integer> allyCodes, Language language, PlayerField... fields )
     {
         return getPlayers( allyCodes, null, language, fields );
     }
-    default CompletableFuture<String> getPlayers( int[] allyCodes, Boolean enums, PlayerField... fields )
+    default CompletableFuture<String> getPlayers( List<Integer> allyCodes, Boolean enums, PlayerField... fields )
     {
         return getPlayers( allyCodes, enums, null, fields );
     }
-    default CompletableFuture<String> getPlayers( int[] allyCodes, PlayerField... fields )
+    default CompletableFuture<String> getPlayers( List<Integer> allyCodes, PlayerField... fields )
     {
         return getPlayers( allyCodes, null, null, fields );
     }
     default CompletableFuture<String> getPlayer( int allyCode, Boolean enums, Language language, PlayerField... fields )
     {
-        return getPlayers( new int[]{allyCode}, enums, language, fields );
+        return getPlayers( Collections.singletonList( allyCode ), enums, language, fields );
     }
     default CompletableFuture<String> getPlayer( int allyCode, Language language, PlayerField... fields )
     {
@@ -282,22 +286,22 @@ public interface SwgohAPI
      * @param fields Optional projection of {@link UnitsField}s you want returned. If no fields are specified, all fields will be returned.
      * @return player profiles organized by units for individual or group of ally codes.
      */
-    CompletableFuture<String> getUnits( int[] allyCodes, boolean includeMods, Boolean enums, Language language, UnitsField... fields );
-    default CompletableFuture<String> getUnits( int[] allyCodes, boolean includeMods, Language language, UnitsField... fields )
+    CompletableFuture<String> getUnits( List<Integer> allyCodes, boolean includeMods, Boolean enums, Language language, UnitsField... fields );
+    default CompletableFuture<String> getUnits( List<Integer> allyCodes, boolean includeMods, Language language, UnitsField... fields )
     {
         return getUnits( allyCodes, includeMods, null, language, fields );
     }
-    default CompletableFuture<String> getUnits( int[] allyCodes, boolean includeMods, Boolean enums, UnitsField... fields )
+    default CompletableFuture<String> getUnits( List<Integer> allyCodes, boolean includeMods, Boolean enums, UnitsField... fields )
     {
         return getUnits( allyCodes, includeMods, enums, null, fields );
     }
-    default CompletableFuture<String> getUnits( int[] allyCodes, boolean includeMods, UnitsField... fields )
+    default CompletableFuture<String> getUnits( List<Integer> allyCodes, boolean includeMods, UnitsField... fields )
     {
         return getUnits( allyCodes, includeMods, null, null, fields );
     }
     default CompletableFuture<String> getUnits( int allyCode, boolean includeMods, Boolean enums, Language language, UnitsField... fields )
     {
-        return getUnits( new int[]{allyCode}, includeMods, enums, language, fields );
+        return getUnits( Collections.singletonList( allyCode ), includeMods, enums, language, fields );
     }
     default CompletableFuture<String> getUnits( int allyCode, boolean includeMods, Language language, UnitsField... fields )
     {
@@ -437,5 +441,55 @@ public interface SwgohAPI
     default CompletableFuture<String> getSupportData( Collection collection, String... fields )
     {
         return getSupportData( collection, null, null, null, fields );
+    }
+
+    /**
+     * This registry is a single-sourced discord-to-ally code registration for all patreon-tier users.
+     *
+     * Add or update registrations from the pool for all patreon-tiered tools to access.
+     *
+     * https://api.swgoh.help/patreon
+     *
+     * @param allyCodeDiscordIdMappings Map of ally code/discord ID associations
+     * @return details about the success of the registration
+     */
+    CompletableFuture<RegistrationResponse> register( Map<Integer, String> allyCodeDiscordIdMappings );
+    default CompletableFuture<RegistrationResponse> registerDiscordId( int allyCode, String discordId )
+    {
+        return register( Collections.singletonMap( allyCode, discordId ) );
+    }
+
+    /**
+     * This registry is a single-sourced discord-to-ally code registration for all patreon-tier users.
+     *
+     * Fetch registrations to the pool for for the specified ally code(s).
+     *
+     * https://api.swgoh.help/patreon
+     *
+     * @param allyCodes List of ally codes to search
+     * @return registered pairing of ally code / discord ID, if any.
+     */
+    CompletableFuture<RegistrationResponse> getRegistrationByAllyCode( List<Integer> allyCodes );
+    default CompletableFuture<RegistrationResponse> getRegistrationByAllyCode( int allyCode )
+    {
+        return getRegistrationByAllyCode( Collections.singletonList( allyCode ) );
+    }
+
+    /**
+     * This registry is a single-sourced discord-to-ally code registration for all patreon-tier users.
+     *
+     * Fetch registrations to the pool for for the specified discord ID(s).
+     *
+     * The discord "snowflake" ID format is specified here: https://discordapp.com/developers/docs/reference#snowflakes
+     *
+     * https://api.swgoh.help/patreon
+     *
+     * @param discordIds List of discord IDs to search
+     * @return registered pairing of ally code / discord ID, if any.
+     */
+    CompletableFuture<RegistrationResponse> getRegistrationByDiscordId( List<String> discordIds );
+    default CompletableFuture<RegistrationResponse> getRegistrationByDiscordId( String discordId )
+    {
+        return getRegistrationByDiscordId( Collections.singletonList( discordId ) );
     }
 }
