@@ -6,10 +6,11 @@ public class RegistrationResponse
 {
     public GetResponse[] get;
     public PutResponse[] put;
+    public DeleteResponse del;
 
     public class PutResponse
     {
-        public @SerializedName( "ok" ) int  successCount;
+        public @SerializedName( "ok" ) int successCount;
         public @SerializedName( "nModified" ) int modifiedCount;
         public @SerializedName( "n" ) int total;
         public UpsertReport[] upserted;
@@ -25,5 +26,11 @@ public class RegistrationResponse
     {
         public int allyCode;
         public String discordId;
+    }
+
+    public class DeleteResponse
+    {
+        public @SerializedName( "ok" ) int success;
+        public @SerializedName( "n" ) int deletedCount;
     }
 }

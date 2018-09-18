@@ -350,6 +350,27 @@ public class SwgohAPIClient implements SwgohAPI
     }
 
     @Override
+    public CompletableFuture<RegistrationResponse> unregister( List<Integer> allyCodes, List<String> discordIds )
+    {
+        Map<String, Object> payload = new HashMap<>();
+
+        List<Object> allyCodesOrDiscordIds = new ArrayList<>();
+        if ( allyCodes != null )
+        {
+            allyCodesOrDiscordIds.addAll( allyCodes );
+        }
+
+        if ( discordIds != null )
+        {
+            allyCodesOrDiscordIds.addAll( discordIds );
+        }
+
+        payload.put( "del", allyCodesOrDiscordIds );
+
+        return API.registration.call( username, password, payload, RegistrationResponse.class );
+    }
+
+    @Override
     public CompletableFuture<RegistrationResponse> getRegistrationByAllyCode( List<Integer> allyCodes )
     {
         Map<String, Object> payload = new HashMap<>();

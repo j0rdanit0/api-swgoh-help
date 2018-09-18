@@ -2,9 +2,12 @@ package help.swgoh.api;
 
 import help.swgoh.api.response.RegistrationResponse;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -23,32 +26,44 @@ public interface SwgohAPI
      */
     enum Language
     {
-        English( "eng_us" ),
-        ChineseSimplified( "chs_cn" ),
-        ChineseTraditional( "cht_cn" ),
-        French( "fre_fr" ),
-        German( "ger_de" ),
-        Indonesian( "ind_id" ),
-        Italian( "ita_it" ),
-        Japanese( "jpn_jp" ),
-        Korean( "kor_kr" ),
-        Portuguese( "por_br" ),
-        Russian( "rus_ru" ),
-        Spanish( "spa_xm" ),
-        Thai( "tha_th" ),
-        Turkish( "tur_tr" ),
+        English( "eng_us", Locale.US ),
+        ChineseSimplified( "chs_cn", Locale.SIMPLIFIED_CHINESE ),
+        ChineseTraditional( "cht_cn", Locale.TRADITIONAL_CHINESE ),
+        French( "fre_fr", Locale.FRANCE ),
+        German( "ger_de", Locale.GERMANY ),
+        Indonesian( "ind_id", new Locale( "ind" ) ),
+        Italian( "ita_it", Locale.ITALY ),
+        Japanese( "jpn_jp", Locale.JAPAN ),
+        Korean( "kor_kr", Locale.KOREA ),
+        Portuguese( "por_br", new Locale( "por" ) ),
+        Russian( "rus_ru", new Locale( "rus" ) ),
+        Spanish( "spa_xm", new Locale( "spa" ) ),
+        Thai( "tha_th", new Locale( "tha" ) ),
+        Turkish( "tur_tr", new Locale( "tur" ) ),
         ;
 
         private final String swgohCode;
+        private final Locale locale;
 
-        Language( String swgohCode )
+        Language( String swgohCode, Locale locale )
         {
             this.swgohCode = swgohCode;
+            this.locale = locale;
         }
 
         public String getSwgohCode()
         {
             return swgohCode;
+        }
+
+        public Locale getLocale()
+        {
+            return locale;
+        }
+
+        public static Optional<Language> fromLocale( Locale locale )
+        {
+            return Arrays.stream( values() ).filter( language -> language.getLocale().equals( locale ) ).findFirst();
         }
     }
 
@@ -97,7 +112,7 @@ public interface SwgohAPI
      */
     enum EventField
     {
-        id, priority, nameKey, summaryKey, descKey, instances, squadType, defensiveSquadType
+        id, priority, nameKey, summaryKey, descKey, instances, squadType, defensiveSquadType, updated
     }
 
     /**
@@ -105,7 +120,7 @@ public interface SwgohAPI
      */
     enum BattleField
     {
-        id, nameKey, descriptionKey, campaignType, campaignMapList
+        id, nameKey, descriptionKey, campaignType, campaignMapList, updated
     }
 
     /**
@@ -454,9 +469,42 @@ public interface SwgohAPI
      * @return details about the success of the registration
      */
     CompletableFuture<RegistrationResponse> register( Map<Integer, String> allyCodeDiscordIdMappings );
-    default CompletableFuture<RegistrationResponse> registerDiscordId( int allyCode, String discordId )
+    default CompletableFuture<RegistrationResponse> register( int allyCode, String discordId )
     {
         return register( Collections.singletonMap( allyCode, discordId ) );
+    }
+
+    /**
+     * This registry is a single-sourced discord-to-ally code registration for all patreon-tier users.
+     *
+     * Delete registrations from the pool that all patreon-tiered tools can access.
+     *
+     * Each ally code that is passed in will have its single associated Discord ID removed.
+     *
+     * Each Discord ID that is passed in will have all of its associated ally codes removed.
+     *
+     * https://api.swgoh.help/patreon
+     *
+     * @param allyCodes List of ally codes to unregister
+     * @param discordIds List of Discord IDs to unregister
+     * @return details about the success of the unregistration
+     */
+    CompletableFuture<RegistrationResponse> unregister( List<Integer> allyCodes, List<String> discordIds );
+    default CompletableFuture<RegistrationResponse> unregisterAllyCodes( List<Integer> allyCodes )
+    {
+        return unregister( allyCodes, null );
+    }
+    default CompletableFuture<RegistrationResponse> unregisterAllyCode( int allyCode )
+    {
+        return unregister( Collections.singletonList( allyCode ), null );
+    }
+    default CompletableFuture<RegistrationResponse> unregisterDiscordIds( List<String> discordIds )
+    {
+        return unregister( null, discordIds );
+    }
+    default CompletableFuture<RegistrationResponse> unregisterDiscordId( String discordId )
+    {
+        return unregister( null, Collections.singletonList( discordId ) );
     }
 
     /**
