@@ -90,6 +90,45 @@ String greedoJson = api.getSupportData( SwgohAPI.Collection.unitsList,
 ```
 ...and so much more! Please reference `SwgohAPI.Collection` for a list of all available data collections.
 
+# Global Discord Registry
+##### (Patreon-tier API accounts only)
+This API offers a Discord registry, which is simply a map of ally codes to Discord IDs.
+
+This registry is shared among all Patreon-tier API accounts. If your users have already registered through a different tool that uses this registry, then their registration will already be available to you as well. 
+
+Registering an ally code more than once will cause that ally code's association to be **overwritten**. Registering a Discord ID more than once will cause that Discord ID to be **linked to multiple ally codes**. This allows users to link their Discord account to all of their game alts, but does not allow a game account to be tied to more than one Discord user at a time.
+
+```java
+//create association
+int allyCode = 123456789;
+String discordId = "098765432123456789";
+api.register( allyCode, discordId );
+```
+```java
+//get association
+int allyCode = 123456789;
+RegistrationResponse response = api.getRegistrationByAllyCode( allyCode ).get();
+//or
+String discordId = "098765432123456789";
+RegistrationResponse response = api.getRegistrationByDiscordId( discordId ).get();
+```
+```java
+//remove association
+int allyCode = 123456789;
+api.unregisterAllyCode( allyCode );
+//or
+String discordId = "098765432123456789";
+api.unregisterDiscordId( discordId );
+```
+
+In order to use this feature, your API account will need to upgrade to Patreon-tier.
+
+You can do this by becoming a Patreon patron and supporting the API in any of the following ways:<br/>
+[API Development](https://www.patreon.com/shittybots/overview)<br/>
+[Server Hosting](https://www.patreon.com/user/posts?u=470177)
+
+After becoming a patron, be sure to log into Discord and contact either `Midgar777#0394` or `shittybill#3024` and give them your API account username so that your account can be given access to this awesome feature.
+
 # Asynchronous API with CompletableFuture
 Don't want to wait on a response from the API? Set up a callback method using the returned [CompletableFuture](https://www.baeldung.com/java-completablefuture).
 
