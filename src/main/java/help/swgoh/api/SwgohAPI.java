@@ -1,7 +1,9 @@
 package help.swgoh.api;
 
+import help.swgoh.api.image.ImageRequest;
 import help.swgoh.api.response.RegistrationResponse;
 
+import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -517,10 +519,10 @@ public interface SwgohAPI
      * @param allyCodes List of ally codes to search
      * @return registered pairing of ally code / discord ID, if any.
      */
-    CompletableFuture<RegistrationResponse> getRegistrationByAllyCode( List<Integer> allyCodes );
+    CompletableFuture<RegistrationResponse> getRegistrationByAllyCodes( List<Integer> allyCodes );
     default CompletableFuture<RegistrationResponse> getRegistrationByAllyCode( int allyCode )
     {
-        return getRegistrationByAllyCode( Collections.singletonList( allyCode ) );
+        return getRegistrationByAllyCodes( Collections.singletonList( allyCode ) );
     }
 
     /**
@@ -535,9 +537,22 @@ public interface SwgohAPI
      * @param discordIds List of discord IDs to search
      * @return registered pairing of ally code / discord ID, if any.
      */
-    CompletableFuture<RegistrationResponse> getRegistrationByDiscordId( List<String> discordIds );
+    CompletableFuture<RegistrationResponse> getRegistrationByDiscordIds( List<String> discordIds );
     default CompletableFuture<RegistrationResponse> getRegistrationByDiscordId( String discordId )
     {
-        return getRegistrationByDiscordId( Collections.singletonList( discordId ) );
+        return getRegistrationByDiscordIds( Collections.singletonList( discordId ) );
     }
+
+    /**
+     * Returns a unit image, customized by the options provided by {@link help.swgoh.api.image.ToonImageRequestBuilder}
+     * or {@link help.swgoh.api.image.ShipImageRequestBuilder}.
+     *
+     * Once the builder's options are defined, its #build() method can be invoked to construct an implementation of
+     * {@link ImageRequest}.
+     *
+     * @param imageRequest The constructed request that can be used to customize the returned image.
+     * @return The customized image.
+     */
+    CompletableFuture<byte[]> getImage( ImageRequest imageRequest );
+    CompletableFuture<BufferedImage> getBufferedImage( ImageRequest imageRequest );
 }
