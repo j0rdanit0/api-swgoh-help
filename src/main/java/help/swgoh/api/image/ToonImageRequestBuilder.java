@@ -6,7 +6,7 @@ import java.awt.*;
  * This builder's purpose is to compile together the elements of a {@link ToonImageRequest} object, which can be used
  * to satisfy the {@link ImageRequest} interface.
  *
- * @since 3.1.5
+ * @since 3.2.0
  */
 public class ToonImageRequestBuilder
 {

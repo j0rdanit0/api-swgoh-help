@@ -8,7 +8,7 @@ package help.swgoh.api.image;
  * can easily be constructed using their respective builders, {@link ToonImageRequestBuilder} and
  * {@link ShipImageRequestBuilder}.
  *
- * @since 3.1.5
+ * @since 3.2.0
  */
 public interface ImageRequest
 {
