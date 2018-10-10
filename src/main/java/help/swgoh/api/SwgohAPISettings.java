@@ -66,7 +66,7 @@ public class SwgohAPISettings
         }
         catch ( Exception exception )
         {
-            throw new SwgohAPIException( "username and/or password are invalid." );
+            throw new SwgohAPIException( "username and/or password are invalid.", exception );
         }
     }
 }

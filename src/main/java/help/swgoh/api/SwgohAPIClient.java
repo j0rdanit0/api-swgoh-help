@@ -1,8 +1,10 @@
 package help.swgoh.api;
 
 import com.google.gson.Gson;
+import help.swgoh.api.exception.SwgohAPIDuplicateRequestException;
 import help.swgoh.api.exception.SwgohAPIException;
 import help.swgoh.api.exception.SwgohAPIRateLimitException;
+import help.swgoh.api.exception.SwgohAPITimeoutException;
 import help.swgoh.api.image.ImageRequest;
 import help.swgoh.api.image.ShipImageRequest;
 import help.swgoh.api.image.ToonImageRequest;
@@ -111,9 +113,20 @@ public class SwgohAPIClient implements SwgohAPI
             }
             catch ( IOException ioException )
             {
-                if ( ioException.getMessage() != null && ioException.getMessage().contains( "429" ) )
+                if ( ioException.getMessage() != null )
                 {
-                    throw new SwgohAPIRateLimitException( ioException );
+                    if ( ioException.getMessage().contains( "429" ) || ioException.getMessage().contains( "502" ) )
+                    {
+                        throw new SwgohAPIRateLimitException( ioException );
+                    }
+                    else if ( ioException.getMessage().contains( "409" ) )
+                    {
+                        throw new SwgohAPIDuplicateRequestException( ioException );
+                    }
+                    else if ( ioException.getMessage().contains( "504" ) )
+                    {
+                        throw new SwgohAPITimeoutException( ioException );
+                    }
                 }
 
                 throw ioException;
