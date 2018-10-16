@@ -4,7 +4,7 @@
 
     <groupId>help.swgoh.api</groupId>
     <artifactId>swgoh-api-connector</artifactId>
-    <version>4.0.1-SNAPSHOT</version>
+    <version>4.0.1</version>
     <packaging>jar</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
@@ -33,7 +33,7 @@
         <connection>scm:git:git://github.com/j0rdanit0/api-swgoh-help.git</connection>
         <developerConnection>scm:git:git@github.com:j0rdanit0/api-swgoh-help.git</developerConnection>
         <url>https://github.com/j0rdanit0/api-swgoh-help</url>
-        <tag>1.0.0</tag>
+        <tag>swgoh-api-connector-4.0.1</tag>
     </scm>
 
     <distributionManagement>
