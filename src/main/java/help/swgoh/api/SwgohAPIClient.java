@@ -262,7 +262,7 @@ public class SwgohAPIClient implements SwgohAPI
     {
         Map<String, Object> payload = new HashMap<>();
         payload.put( "allycode", allyCode );
-        payload.put( "roster", true );
+        payload.put( "roster", false );
         payload.put( "units", true );
         payload.put( "mods", includeMods );
         payload.put( "enums", enums == null ? defaultEnums : enums );
