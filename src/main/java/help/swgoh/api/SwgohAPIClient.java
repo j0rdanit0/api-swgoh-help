@@ -49,6 +49,7 @@ public class SwgohAPIClient implements SwgohAPI
         player( "/swgoh/player" ),
         guild( "/swgoh/guild" ),
         units( "/swgoh/units" ),
+        roster( "/swgoh/roster" ),
         data( "/swgoh/data" ),
         zetas( "/swgoh/zetas" ),
         squads( "/swgoh/squads" ),
@@ -70,33 +71,15 @@ public class SwgohAPIClient implements SwgohAPI
 
         public CompletableFuture<String> call( String username, String password, Map<String, Object> payload )
         {
-            return CompletableFuture.supplyAsync( () -> {
-                try
-                {
-                    return getJson( username, password, payload );
-                }
-                catch ( Exception exception )
-                {
-                    throw new SwgohAPIException( "Unable to complete request.", exception );
-                }
-            } );
+            return CompletableFuture.supplyAsync( () -> getJson( username, password, payload ) );
         }
 
         public <T> CompletableFuture<T> call( String username, String password, Map<String, Object> payload, Class<T> resultType )
         {
-            return CompletableFuture.supplyAsync( () -> {
-                try
-                {
-                    return GSON.fromJson( getJson( username, password, payload ), resultType );
-                }
-                catch ( Exception exception )
-                {
-                    throw new SwgohAPIException( "Unable to complete request.", exception );
-                }
-            } );
+            return CompletableFuture.supplyAsync( () -> GSON.fromJson( getJson( username, password, payload ), resultType ) );
         }
 
-        private String getJson( String username, String password, Map<String, Object> payload ) throws IOException
+        private String getJson( String username, String password, Map<String, Object> payload )
         {
             try
             {
@@ -129,7 +112,7 @@ public class SwgohAPIClient implements SwgohAPI
                     }
                 }
 
-                throw ioException;
+                throw new SwgohAPIException( "Unable to complete request.", ioException );
             }
         }
 
@@ -218,6 +201,20 @@ public class SwgohAPIClient implements SwgohAPI
     }
 
     @Override
+    public CompletableFuture<String> getPlayers( List<Integer> allyCodes, Language language, SwgohAPIFilter filter )
+    {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put( "allycodes", allyCodes );
+        payload.put( "enums", defaultEnums );
+        payload.put( "language", language == null ? defaultLanguage : language.getSwgohCode() );
+
+        createProjection( payload, filter );
+
+        return API.player.call( username, password, payload );
+    }
+
+    @Deprecated
+    @Override
     public CompletableFuture<String> getPlayers( List<Integer> allyCodes, Boolean enums, Language language, PlayerField... fields )
     {
         Map<String, Object> payload = new HashMap<>();
@@ -230,6 +227,20 @@ public class SwgohAPIClient implements SwgohAPI
         return API.player.call( username, password, payload );
     }
 
+    @Override
+    public CompletableFuture<String> getGuild( int allyCode, Language language, SwgohAPIFilter filter )
+    {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put( "allycode", allyCode );
+        payload.put( "enums", defaultEnums );
+        payload.put( "language", language == null ? defaultLanguage : language.getSwgohCode() );
+
+        createProjection( payload, filter );
+
+        return API.guild.call( username, password, payload );
+    }
+
+    @Deprecated
     @Override
     public CompletableFuture<String> getGuild( int allyCode, Boolean enums, Language language, GuildField... fields )
     {
@@ -244,6 +255,21 @@ public class SwgohAPIClient implements SwgohAPI
     }
 
     @Override
+    public CompletableFuture<String> getLargeGuild( int allyCode, Language language, SwgohAPIFilter filter )
+    {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put( "allycode", allyCode );
+        payload.put( "roster", true );
+        payload.put( "enums", defaultEnums );
+        payload.put( "language", language == null ? defaultLanguage : language.getSwgohCode() );
+
+        createProjection( payload, filter );
+
+        return API.guild.call( username, password, payload );
+    }
+
+    @Deprecated
+    @Override
     public CompletableFuture<String> getLargeGuild( int allyCode, Boolean enums, Language language, GuildField... fields )
     {
         Map<String, Object> payload = new HashMap<>();
@@ -257,12 +283,12 @@ public class SwgohAPIClient implements SwgohAPI
         return API.guild.call( username, password, payload );
     }
 
+    @Deprecated
     @Override
     public CompletableFuture<String> getGuildUnits( int allyCode, boolean includeMods, Boolean enums, Language language, GuildField... fields )
     {
         Map<String, Object> payload = new HashMap<>();
         payload.put( "allycode", allyCode );
-        payload.put( "roster", false );
         payload.put( "units", true );
         payload.put( "mods", includeMods );
         payload.put( "enums", enums == null ? defaultEnums : enums );
@@ -273,6 +299,20 @@ public class SwgohAPIClient implements SwgohAPI
         return API.guild.call( username, password, payload );
     }
 
+    @Override
+    public CompletableFuture<String> getRosters( List<Integer> allyCodes, Language language, SwgohAPIFilter filter )
+    {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put( "allycode", allyCodes );
+        payload.put( "enums", defaultEnums );
+        payload.put( "language", language == null ? defaultLanguage : language.getSwgohCode() );
+
+        createProjection( payload, filter );
+
+        return API.roster.call( username, password, payload );
+    }
+
+    @Deprecated
     @Override
     public CompletableFuture<String> getUnits( List<Integer> allyCodes, boolean includeMods, Boolean enums, Language language, UnitsField... fields )
     {
@@ -288,6 +328,17 @@ public class SwgohAPIClient implements SwgohAPI
     }
 
     @Override
+    public CompletableFuture<String> getZetaRecommendations( SwgohAPIFilter filter )
+    {
+        Map<String, Object> payload = new HashMap<>();
+
+        createProjection( payload, filter );
+
+        return API.zetas.call( username, password, payload );
+    }
+
+    @Deprecated
+    @Override
     public CompletableFuture<String> getZetaRecommendations( ZetaRecommendationField... fields )
     {
         Map<String, Object> payload = new HashMap<>();
@@ -298,6 +349,17 @@ public class SwgohAPIClient implements SwgohAPI
     }
 
     @Override
+    public CompletableFuture<String> getSquadRecommendations( SwgohAPIFilter filter )
+    {
+        Map<String, Object> payload = new HashMap<>();
+
+        createProjection( payload, filter );
+
+        return API.squads.call( username, password, payload );
+    }
+
+    @Deprecated
+    @Override
     public CompletableFuture<String> getSquadRecommendations( SquadRecommendationField... fields )
     {
         Map<String, Object> payload = new HashMap<>();
@@ -307,6 +369,19 @@ public class SwgohAPIClient implements SwgohAPI
         return API.squads.call( username, password, payload );
     }
 
+    @Override
+    public CompletableFuture<String> getEvents( Language language, SwgohAPIFilter filter )
+    {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put( "enums", defaultEnums );
+        payload.put( "language", language == null ? defaultLanguage : language.getSwgohCode() );
+
+        createProjection( payload, filter );
+
+        return API.events.call( username, password, payload );
+    }
+
+    @Deprecated
     @Override
     public CompletableFuture<String> getEvents( Boolean enums, Language language, EventField... fields )
     {
@@ -320,6 +395,19 @@ public class SwgohAPIClient implements SwgohAPI
     }
 
     @Override
+    public CompletableFuture<String> getBattles( Language language, SwgohAPIFilter filter )
+    {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put( "enums", defaultEnums );
+        payload.put( "language", language == null ? defaultLanguage : language.getSwgohCode() );
+
+        createProjection( payload, filter );
+
+        return API.battles.call( username, password, payload );
+    }
+
+    @Deprecated
+    @Override
     public CompletableFuture<String> getBattles( Boolean enums, Language language, BattleField... fields )
     {
         Map<String, Object> payload = new HashMap<>();
@@ -331,6 +419,25 @@ public class SwgohAPIClient implements SwgohAPI
         return API.battles.call( username, password, payload );
     }
 
+    @Override
+    public CompletableFuture<String> getSupportData( Collection collection, Map<String, Object> matchCriteria, Language language, SwgohAPIFilter filter )
+    {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put( "collection", collection.name() );
+        payload.put( "enums", defaultEnums );
+        payload.put( "language", language == null ? defaultLanguage : language.getSwgohCode() );
+
+        if ( matchCriteria != null )
+        {
+            payload.put( "match", matchCriteria );
+        }
+
+        createProjection( payload, filter );
+
+        return API.data.call( username, password, payload );
+    }
+
+    @Deprecated
     @Override
     public CompletableFuture<String> getSupportData( Collection collection, Map<String, Object> matchCriteria, Boolean enums, Language language, String... fields )
     {
@@ -576,6 +683,32 @@ public class SwgohAPIClient implements SwgohAPI
 
             createProjection( payload, stringFields.toArray( new String[]{} ) );
         }
+    }
+
+    private void createProjection( Map<String, Object> payload, SwgohAPIFilter filter )
+    {
+        if ( filter != null && filter.getFilters().size() > 0 )
+        {
+            payload.put( "project", convertInnerFilters( filter ) );
+        }
+    }
+
+    private Map<String, Object> convertInnerFilters( SwgohAPIFilter filter )
+    {
+        Map<String, Object> fieldsMap = new HashMap<>();
+        for ( Object element : filter.getFilters() )
+        {
+            if ( element instanceof SwgohAPIFilter.InnerFilter )
+            {
+                fieldsMap.put( ((SwgohAPIFilter.InnerFilter) element).element, convertInnerFilters( ((SwgohAPIFilter.InnerFilter) element).filter ) );
+            }
+            else
+            {
+                fieldsMap.put( (String)element, 1 );
+            }
+        }
+
+        return fieldsMap;
     }
 
     private void createProjection( Map<String, Object> payload, String... fields )

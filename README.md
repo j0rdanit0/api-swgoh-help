@@ -41,7 +41,7 @@ String player = api.getPlayer( allyCode ).get();
 //multiple players
 int allyCode = 123456789;
 int otherAllyCode = 987654321;
-int[] allyCodes = new int[] { allyCode, otherAllyCode };
+List<Integer> allyCodes = Arrays.asList( allyCode, otherAllyCode );
 String players = api.getPlayers( allyCodes ).get();
 ```
 ```java
@@ -49,9 +49,7 @@ String players = api.getPlayers( allyCodes ).get();
 int allyCode = 123456789;
 String player = api.getPlayer( 
         allyCode,
-        SwgohAPI.PlayerField.name,
-        SwgohAPI.PlayerField.allyCode,
-        SwgohAPI.PlayerField.roster,
+        new SwgohAPIFilter( "name", "allyCode", "roster" )
 ).get();
 ```
 
@@ -65,10 +63,7 @@ String guild = api.getGuild( allyCode ).get();
 int allyCode = 123456789;
 String guild = api.getGuild( 
         allyCode,
-        SwgohAPI.GuildField.name,
-        SwgohAPI.GuildField.gp,
-        SwgohAPI.GuildField.roster,
-        SwgohAPI.GuildField.updated
+        new SwgohAPIFilter( "name", "gp", "roster", "updated" )
 ).get();
 ```
 
@@ -85,7 +80,7 @@ matchCriteria.put( "rarity", 7 );
 String greedoJson = api.getSupportData( SwgohAPI.Collection.unitsList,
         matchCriteria,
         SwgohAPI.Language.English,
-        "nameKey", "combatType", "descKey", "thumbnailName", "baseId"
+        new SwgohAPIFilter( "nameKey", "combatType", "descKey", "thumbnailName", "baseId" )
 ).get();
 ```
 ...and so much more! Please reference `SwgohAPI.Collection` for a list of all available data collections.
@@ -205,6 +200,9 @@ public class SwgohService
 NodeJS:<br/>
 https://github.com/r3volved/api-swgoh-help/tree/node
 
+NPM:<br/>
+https://www.npmjs.com/package/api-swgoh-help
+
 Java:<br/>
 https://github.com/j0rdanit0/api-swgoh-help
 
@@ -217,7 +215,14 @@ https://github.com/r3volved/api-swgoh-help/tree/php <br/>
 https://github.com/rayderua/swhelp-api-client
 
 Google App Script:<br/>
-https://github.com/Dragonsight91/api-swgoh-help
+https://github.com/Dragonsight91/api-swgoh-help <br/>
+https://github.com/PopGoesTheWza/swgoh-help-api
+
+Google Sheets:<br/>
+https://docs.google.com/spreadsheets/d/1lxRBR4d9bWKWGmnhkjYiZ5EMkFogtaCR-qN22D_DGsw/edit?usp=copy
 
 Python:<br/>
 https://github.com/platzman/swgoh.help.python
+
+Laravel:<br/>
+https://github.com/matthillman/swgoh-help
