@@ -28,29 +28,31 @@ public interface SwgohAPI
      */
     enum Language
     {
-        English( "eng_us", Locale.US ),
-        ChineseSimplified( "chs_cn", Locale.SIMPLIFIED_CHINESE ),
-        ChineseTraditional( "cht_cn", Locale.TRADITIONAL_CHINESE ),
-        French( "fre_fr", Locale.FRANCE ),
-        German( "ger_de", Locale.GERMANY ),
-        Indonesian( "ind_id", new Locale( "ind" ) ),
-        Italian( "ita_it", Locale.ITALY ),
-        Japanese( "jpn_jp", Locale.JAPAN ),
-        Korean( "kor_kr", Locale.KOREA ),
-        Portuguese( "por_br", new Locale( "por" ) ),
-        Russian( "rus_ru", new Locale( "rus" ) ),
-        Spanish( "spa_xm", new Locale( "spa" ) ),
-        Thai( "tha_th", new Locale( "tha" ) ),
-        Turkish( "tur_tr", new Locale( "tur" ) ),
+        English( "eng_us", Locale.US, "English" ),
+        ChineseSimplified( "chs_cn", Locale.SIMPLIFIED_CHINESE, "简体中文" ),
+        ChineseTraditional( "cht_cn", Locale.TRADITIONAL_CHINESE, "繁體中文" ),
+        French( "fre_fr", Locale.FRANCE, "Français" ),
+        German( "ger_de", Locale.GERMANY, "Deutsch" ),
+        Indonesian( "ind_id", new Locale( "ind" ), "Bahasa Indonesia" ),
+        Italian( "ita_it", Locale.ITALY, "Italiano" ),
+        Japanese( "jpn_jp", Locale.JAPAN, "日本語" ),
+        Korean( "kor_kr", Locale.KOREA, "한국어" ),
+        Portuguese( "por_br", new Locale( "por" ), "Português" ),
+        Russian( "rus_ru", new Locale( "rus" ), "русский" ),
+        Spanish( "spa_xm", new Locale( "spa" ), "Español" ),
+        Thai( "tha_th", new Locale( "tha" ), "ไทย" ),
+        Turkish( "tur_tr", new Locale( "tur" ), "Türkçe" ),
         ;
 
         private final String swgohCode;
         private final Locale locale;
+        private final String displayName;
 
-        Language( String swgohCode, Locale locale )
+        Language( String swgohCode, Locale locale, String displayName )
         {
             this.swgohCode = swgohCode;
             this.locale = locale;
+            this.displayName = displayName;
         }
 
         public String getSwgohCode()
@@ -61,6 +63,11 @@ public interface SwgohAPI
         public Locale getLocale()
         {
             return locale;
+        }
+
+        public String getDisplayName()
+        {
+            return displayName;
         }
 
         public static Optional<Language> fromLocale( Locale locale )
@@ -757,6 +764,10 @@ public interface SwgohAPI
     {
         return getSupportData( collection, matchCriteria, null, filter );
     }
+    /**
+     * @deprecated as of 4.2.0 - API now forces you to specify either a matchCriteria or a filter.
+     */
+    @Deprecated
     default CompletableFuture<String> getSupportData( Collection collection, Language language )
     {
         return getSupportData( collection, null, language, SwgohAPIFilter.ALL );
@@ -769,6 +780,10 @@ public interface SwgohAPI
     {
         return getSupportData( collection, matchCriteria, null, SwgohAPIFilter.ALL );
     }
+    /**
+     * @deprecated as of 4.2.0 - API now forces you to specify either a matchCriteria or a filter.
+     */
+    @Deprecated
     default CompletableFuture<String> getSupportData( Collection collection )
     {
         return getSupportData( collection, null, null, SwgohAPIFilter.ALL );

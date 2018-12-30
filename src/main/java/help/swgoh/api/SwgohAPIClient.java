@@ -164,7 +164,7 @@ public class SwgohAPIClient implements SwgohAPI
                 SwgohAPIToken token = fetchToken( username, password );
 
                 CompletableFuture.runAsync( () -> {
-                    try { Thread.sleep( (token.expires_in - 1) * 1000 ); } catch ( Exception exception ) {}
+                    try { Thread.sleep( (token.expires_in - 5) * 1000 ); } catch ( Exception exception ) {}
                 } ).thenRun( () -> TOKEN.access_token = null );
 
                 TOKEN.access_token = token.access_token;
