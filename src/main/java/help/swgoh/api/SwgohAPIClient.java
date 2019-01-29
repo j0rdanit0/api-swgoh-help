@@ -3,6 +3,7 @@ package help.swgoh.api;
 import com.google.gson.Gson;
 import help.swgoh.api.exception.SwgohAPIDuplicateRequestException;
 import help.swgoh.api.exception.SwgohAPIException;
+import help.swgoh.api.exception.SwgohAPINotFoundException;
 import help.swgoh.api.exception.SwgohAPIRateLimitException;
 import help.swgoh.api.exception.SwgohAPITimeoutException;
 import help.swgoh.api.image.ImageRequest;
@@ -15,6 +16,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -93,6 +95,10 @@ public class SwgohAPIClient implements SwgohAPI
                     }
                     return sb.toString();
                 }
+            }
+            catch ( FileNotFoundException exception )
+            {
+                throw new SwgohAPINotFoundException( exception );
             }
             catch ( IOException ioException )
             {

@@ -28,31 +28,33 @@ public interface SwgohAPI
      */
     enum Language
     {
-        English( "eng_us", Locale.US, "English" ),
-        ChineseSimplified( "chs_cn", Locale.SIMPLIFIED_CHINESE, "简体中文" ),
-        ChineseTraditional( "cht_cn", Locale.TRADITIONAL_CHINESE, "繁體中文" ),
-        French( "fre_fr", Locale.FRANCE, "Français" ),
-        German( "ger_de", Locale.GERMANY, "Deutsch" ),
-        Indonesian( "ind_id", new Locale( "ind" ), "Bahasa Indonesia" ),
-        Italian( "ita_it", Locale.ITALY, "Italiano" ),
-        Japanese( "jpn_jp", Locale.JAPAN, "日本語" ),
-        Korean( "kor_kr", Locale.KOREA, "한국어" ),
-        Portuguese( "por_br", new Locale( "por" ), "Português" ),
-        Russian( "rus_ru", new Locale( "rus" ), "русский" ),
-        Spanish( "spa_xm", new Locale( "spa" ), "Español" ),
-        Thai( "tha_th", new Locale( "tha" ), "ไทย" ),
-        Turkish( "tur_tr", new Locale( "tur" ), "Türkçe" ),
+        English( "eng_us", Locale.US, "English", "\uD83C\uDDFA\uD83C\uDDF8" ),
+        ChineseSimplified( "chs_cn", Locale.SIMPLIFIED_CHINESE, "简体中文", "\uD83C\uDDE8\uD83C\uDDF3" ),
+        ChineseTraditional( "cht_cn", Locale.TRADITIONAL_CHINESE, "繁體中文", "\uD83C\uDDF9\uD83C\uDDFC" ),
+        French( "fre_fr", Locale.FRANCE, "Français", "\uD83C\uDDEB\uD83C\uDDF7" ),
+        German( "ger_de", Locale.GERMANY, "Deutsch", "\uD83C\uDDE9\uD83C\uDDEA" ),
+        Indonesian( "ind_id", new Locale( "ind" ), "Bahasa Indonesia", "\uD83C\uDDEE\uD83C\uDDE9" ),
+        Italian( "ita_it", Locale.ITALY, "Italiano", "\uD83C\uDDEE\uD83C\uDDF9" ),
+        Japanese( "jpn_jp", Locale.JAPAN, "日本語", "\uD83C\uDDEF\uD83C\uDDF5" ),
+        Korean( "kor_kr", Locale.KOREA, "한국어", "\uD83C\uDDF0\uD83C\uDDF7" ),
+        Portuguese( "por_br", new Locale( "por" ), "Português", "\uD83C\uDDE7\uD83C\uDDF7" ),
+        Russian( "rus_ru", new Locale( "rus" ), "русский", "\uD83C\uDDF7\uD83C\uDDFA" ),
+        Spanish( "spa_xm", new Locale( "spa" ), "Español", "\uD83C\uDDEA\uD83C\uDDF8" ),
+        Thai( "tha_th", new Locale( "tha" ), "ไทย", "\uD83C\uDDF9\uD83C\uDDED" ),
+        Turkish( "tur_tr", new Locale( "tur" ), "Türkçe", "\uD83C\uDDF9\uD83C\uDDF7" ),
         ;
 
         private final String swgohCode;
         private final Locale locale;
         private final String displayName;
+        private final String unicode;
 
-        Language( String swgohCode, Locale locale, String displayName )
+        Language( String swgohCode, Locale locale, String displayName, String unicode )
         {
             this.swgohCode = swgohCode;
             this.locale = locale;
             this.displayName = displayName;
+            this.unicode = unicode;
         }
 
         public String getSwgohCode()
@@ -70,9 +72,29 @@ public interface SwgohAPI
             return displayName;
         }
 
+        public String getUnicode()
+        {
+            return unicode;
+        }
+
+        public static Optional<Language> fromSwgohCode( String swgohCode )
+        {
+            return Arrays.stream( values() ).filter( language -> language.getSwgohCode().equalsIgnoreCase( swgohCode ) ).findFirst();
+        }
+
         public static Optional<Language> fromLocale( Locale locale )
         {
             return Arrays.stream( values() ).filter( language -> language.getLocale().equals( locale ) ).findFirst();
+        }
+
+        public static Optional<Language> fromDisplayName( String displayName )
+        {
+            return Arrays.stream( values() ).filter( language -> language.getDisplayName().equalsIgnoreCase( displayName ) ).findFirst();
+        }
+
+        public static Optional<Language> fromUnicode( String unicode )
+        {
+            return Arrays.stream( values() ).filter( language -> language.getUnicode().equals( unicode ) ).findFirst();
         }
     }
 
