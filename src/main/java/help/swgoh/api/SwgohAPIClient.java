@@ -6,20 +6,9 @@ import help.swgoh.api.exception.SwgohAPIException;
 import help.swgoh.api.exception.SwgohAPINotFoundException;
 import help.swgoh.api.exception.SwgohAPIRateLimitException;
 import help.swgoh.api.exception.SwgohAPITimeoutException;
-import help.swgoh.api.image.ImageRequest;
-import help.swgoh.api.image.ShipImageRequest;
-import help.swgoh.api.image.ToonImageRequest;
 import help.swgoh.api.response.RegistrationResponse;
-import org.apache.commons.io.IOUtils;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -29,9 +18,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.zip.GZIPInputStream;
 
 public class SwgohAPIClient implements SwgohAPI
 {
+    private static final Gson GSON = new Gson();
+    private static final SwgohAPIToken TOKEN = new SwgohAPIToken();
+    private static final ScheduledExecutorService TOKEN_REFRESHER_SERVICE = new ScheduledThreadPoolExecutor( 1 );
+
+    private final String urlBase;
     private final String username;
     private final String password;
     private final String defaultLanguage;
@@ -39,6 +37,7 @@ public class SwgohAPIClient implements SwgohAPI
 
     SwgohAPIClient( SwgohAPISettings settings )
     {
+        urlBase = settings.getUrlBase();
         username = settings.getUsername();
         password = settings.getPassword();
         defaultLanguage = settings.getDefaultLanguage() == null ? null : settings.getDefaultLanguage().getSwgohCode();
@@ -48,21 +47,16 @@ public class SwgohAPIClient implements SwgohAPI
     public enum API
     {
         signin( "/auth/signin" ),
-        player( "/swgoh/player" ),
-        guild( "/swgoh/guild" ),
-        units( "/swgoh/units" ),
+        players( "/swgoh/players" ),
+        guilds( "/swgoh/guilds" ),
         roster( "/swgoh/roster" ),
-        data( "/swgoh/data" ),
         zetas( "/swgoh/zetas" ),
         squads( "/swgoh/squads" ),
         events( "/swgoh/events" ),
         battles( "/swgoh/battles" ),
+        data( "/swgoh/data" ),
         registration( "/registration" ),
         ;
-
-        private static final String URL_BASE = "https://api.swgoh.help";
-        private static final Gson GSON = new Gson();
-        private static final SwgohAPIToken TOKEN = new SwgohAPIToken();
 
         private final String path;
 
@@ -71,139 +65,163 @@ public class SwgohAPIClient implements SwgohAPI
             this.path = path;
         }
 
-        public CompletableFuture<String> call( String username, String password, Map<String, Object> payload )
+        public String getPath()
         {
-            return CompletableFuture.supplyAsync( () -> getJson( username, password, payload ) );
+            return path;
         }
+    }
 
-        public <T> CompletableFuture<T> call( String username, String password, Map<String, Object> payload, Class<T> resultType )
-        {
-            return CompletableFuture.supplyAsync( () -> GSON.fromJson( getJson( username, password, payload ), resultType ) );
-        }
+    public CompletableFuture<String> call( API api, String username, String password, Map<String, Object> payload )
+    {
+        return CompletableFuture.supplyAsync( () -> getJson( api, username, password, payload ) );
+    }
 
-        private String getJson( String username, String password, Map<String, Object> payload )
+    public <T> CompletableFuture<T> call( API api, String username, String password, Map<String, Object> payload, Class<T> resultType )
+    {
+        return CompletableFuture.supplyAsync( () -> GSON.fromJson( getJson( api, username, password, payload ), resultType ) );
+    }
+
+    private String getJson( API api, String username, String password, Map<String, Object> payload )
+    {
+        try
         {
-            try
+            try ( BufferedReader br = new BufferedReader( getInputReader( getAuthorizedConnection( api, username, password, payload ) ) ) )
             {
-                try ( BufferedReader br = new BufferedReader( new InputStreamReader( getAuthorizedConnection( username, password, payload ).getInputStream() ) ) )
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ( ( line = br.readLine() ) != null )
                 {
-                    StringBuilder sb = new StringBuilder();
-                    String line;
-                    while ( ( line = br.readLine() ) != null )
-                    {
-                        sb.append( line ).append( "\n" );
-                    }
-                    return sb.toString();
+                    sb.append( line ).append( "\n" );
                 }
-            }
-            catch ( FileNotFoundException exception )
-            {
-                throw new SwgohAPINotFoundException( exception );
-            }
-            catch ( IOException ioException )
-            {
-                if ( ioException.getMessage() != null )
-                {
-                    if ( ioException.getMessage().contains( "429" ) || ioException.getMessage().contains( "502" ) )
-                    {
-                        throw new SwgohAPIRateLimitException( ioException );
-                    }
-                    else if ( ioException.getMessage().contains( "409" ) )
-                    {
-                        throw new SwgohAPIDuplicateRequestException( ioException );
-                    }
-                    else if ( ioException.getMessage().contains( "504" ) )
-                    {
-                        throw new SwgohAPITimeoutException( ioException );
-                    }
-                }
-
-                throw new SwgohAPIException( "Unable to complete request.", ioException );
+                return sb.toString();
             }
         }
-
-        private HttpURLConnection getAuthorizedConnection( String username, String password, Map<String, Object> payload ) throws IOException
+        catch ( FileNotFoundException exception )
         {
-            if ( TOKEN.access_token == null )
+            throw new SwgohAPINotFoundException( exception );
+        }
+        catch ( IOException ioException )
+        {
+            if ( ioException.getMessage() != null )
             {
-                synchronized ( TOKEN )
+                if ( ioException.getMessage().contains( "429" ) || ioException.getMessage().contains( "502" ) )
                 {
-                    if ( TOKEN.access_token == null )
-                    {
-                        login( username, password );
-                    }
+                    throw new SwgohAPIRateLimitException( ioException );
+                }
+                else if ( ioException.getMessage().contains( "409" ) )
+                {
+                    throw new SwgohAPIDuplicateRequestException( ioException );
+                }
+                else if ( ioException.getMessage().contains( "504" ) )
+                {
+                    throw new SwgohAPITimeoutException( ioException );
                 }
             }
 
-            byte[] postData = GSON.toJson( payload ).getBytes( StandardCharsets.UTF_8 );
-            HttpURLConnection connection = createConnection( this, postData );
-            connection.setRequestProperty( "Authorization", "Bearer " + TOKEN.access_token );
-            connection.setRequestProperty( "Content-Type", "application/json" );
-
-            try( DataOutputStream outputStream = new DataOutputStream( connection.getOutputStream() ) )
-            {
-                outputStream.write( postData );
-            }
-
-            return connection;
+            throw new SwgohAPIException( "Unable to complete request.", ioException );
         }
+    }
 
-        private static HttpURLConnection createConnection( API api, byte[] postData ) throws IOException
+    private HttpURLConnection getAuthorizedConnection( API api, String username, String password, Map<String, Object> payload ) throws IOException
+    {
+        if ( TOKEN.access_token == null )
         {
-            HttpURLConnection connection = (HttpURLConnection) api.getUrl().openConnection();
-            connection.setRequestMethod( "POST" );
-
-            connection.setDoOutput( true );
-            connection.setInstanceFollowRedirects( false );
-            connection.setUseCaches( false );
-            connection.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded" );
-            connection.setRequestProperty( "charset", "utf-8" );
-            connection.setRequestProperty( "Content-Length", postData.length+"" );
-
-            return connection;
-        }
-
-        public static void login( String username, String password )
-        {
-            try
+            synchronized ( TOKEN )
             {
-                SwgohAPIToken token = fetchToken( username, password );
-
-                CompletableFuture.runAsync( () -> {
-                    try { Thread.sleep( (token.expires_in - 5) * 1000 ); } catch ( Exception exception ) {}
-                } ).thenRun( () -> TOKEN.access_token = null );
-
-                TOKEN.access_token = token.access_token;
-            }
-            catch ( Throwable exception )
-            {
-                throw new SwgohAPIException( "Unable to authorize with API.", exception );
+                if ( TOKEN.access_token == null )
+                {
+                    login( urlBase, username, password );
+                }
             }
         }
 
-        private static SwgohAPIToken fetchToken( String username, String password ) throws IOException
+        byte[] postData = GSON.toJson( payload ).getBytes( StandardCharsets.UTF_8 );
+        HttpURLConnection connection = createConnection( urlBase, api, postData );
+        connection.setRequestProperty( "Authorization", "Bearer " + TOKEN.access_token );
+        connection.setRequestProperty( "Content-Type", "application/json" );
+
+        try( DataOutputStream outputStream = new DataOutputStream( connection.getOutputStream() ) )
         {
-            String loginCredentials = "username=" + username +
-                                      "&password=" + password +
-                                      "&grant_type=password" +
-                                      "&client_id=abc" +
-                                      "&client_secret=123";
-
-            byte[] postData = loginCredentials.getBytes( StandardCharsets.UTF_8 );
-            HttpURLConnection connection = createConnection( API.signin, postData );
-
-            try( DataOutputStream outputStream = new DataOutputStream( connection.getOutputStream() ) )
-            {
-                outputStream.write( postData );
-            }
-
-            return GSON.fromJson( new InputStreamReader( connection.getInputStream() ), SwgohAPIToken.class );
+            outputStream.write( postData );
         }
 
-        private URL getUrl() throws MalformedURLException
+        return connection;
+    }
+
+    private static HttpURLConnection createConnection( String urlBase, API api, byte[] postData ) throws IOException
+    {
+        HttpURLConnection connection = (HttpURLConnection) getUrl( urlBase, api ).openConnection();
+        connection.setRequestMethod( "POST" );
+
+        connection.setDoOutput( true );
+        connection.setInstanceFollowRedirects( false );
+        connection.setUseCaches( false );
+        connection.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded" );
+        connection.setRequestProperty( "charset", "utf-8" );
+        connection.setRequestProperty( "Content-Length", postData.length+"" );
+        connection.setRequestProperty( "Accept-Encoding", "gzip" );
+
+        return connection;
+    }
+
+    public static void login( String urlBase, String username, String password )
+    {
+        try
         {
-            return new URL( URL_BASE + path );
+            long requestStartMillis = System.currentTimeMillis();
+            SwgohAPIToken token = fetchToken( urlBase, username, password );
+            TOKEN.access_token = token.access_token;
+            long requestMillis = System.currentTimeMillis() - requestStartMillis;
+
+            TOKEN_REFRESHER_SERVICE.schedule(
+                    () -> TOKEN.access_token = null,
+                    Math.max( 0, (token.expires_in * 1000) - requestMillis - 50 ),
+                    TimeUnit.MILLISECONDS
+            );
         }
+        catch ( Throwable exception )
+        {
+            throw new SwgohAPIException( "Unable to authorize with API.", exception );
+        }
+    }
+
+    private static SwgohAPIToken fetchToken( String urlBase, String username, String password ) throws IOException
+    {
+        String loginCredentials = "username=" + username +
+                                  "&password=" + password +
+                                  "&grant_type=password" +
+                                  "&client_id=abc" +
+                                  "&client_secret=123";
+
+        byte[] postData = loginCredentials.getBytes( StandardCharsets.UTF_8 );
+        HttpURLConnection connection = createConnection( urlBase, API.signin, postData );
+
+        try( DataOutputStream outputStream = new DataOutputStream( connection.getOutputStream() ) )
+        {
+            outputStream.write( postData );
+        }
+
+        return GSON.fromJson( getInputReader( connection ), SwgohAPIToken.class );
+    }
+
+    private static Reader getInputReader( HttpURLConnection connection ) throws IOException
+    {
+        Reader reader;
+        if ( "gzip".equals( connection.getContentEncoding() ) )
+        {
+            reader = new InputStreamReader( new GZIPInputStream( connection.getInputStream() ) );
+        }
+        else
+        {
+            reader = new InputStreamReader( connection.getInputStream() );
+        }
+
+        return reader;
+    }
+
+    private static URL getUrl( String urlBase, API api ) throws MalformedURLException
+    {
+        return new URL( urlBase + api.getPath() );
     }
 
     @Override
@@ -216,21 +234,7 @@ public class SwgohAPIClient implements SwgohAPI
 
         createProjection( payload, filter );
 
-        return API.player.call( username, password, payload );
-    }
-
-    @Deprecated
-    @Override
-    public CompletableFuture<String> getPlayers( List<Integer> allyCodes, Boolean enums, Language language, PlayerField... fields )
-    {
-        Map<String, Object> payload = new HashMap<>();
-        payload.put( "allycodes", allyCodes );
-        payload.put( "enums", enums == null ? defaultEnums : enums );
-        payload.put( "language", language == null ? defaultLanguage : language.getSwgohCode() );
-
-        createProjection( payload, fields );
-
-        return API.player.call( username, password, payload );
+        return call( API.players, username, password, payload );
     }
 
     @Override
@@ -243,21 +247,7 @@ public class SwgohAPIClient implements SwgohAPI
 
         createProjection( payload, filter );
 
-        return API.guild.call( username, password, payload );
-    }
-
-    @Deprecated
-    @Override
-    public CompletableFuture<String> getGuild( int allyCode, Boolean enums, Language language, GuildField... fields )
-    {
-        Map<String, Object> payload = new HashMap<>();
-        payload.put( "allycode", allyCode );
-        payload.put( "enums", enums == null ? defaultEnums : enums );
-        payload.put( "language", language == null ? defaultLanguage : language.getSwgohCode() );
-
-        createProjection( payload, fields );
-
-        return API.guild.call( username, password, payload );
+        return call( API.guilds, username, password, payload );
     }
 
     @Override
@@ -271,38 +261,7 @@ public class SwgohAPIClient implements SwgohAPI
 
         createProjection( payload, filter );
 
-        return API.guild.call( username, password, payload );
-    }
-
-    @Deprecated
-    @Override
-    public CompletableFuture<String> getLargeGuild( int allyCode, Boolean enums, Language language, GuildField... fields )
-    {
-        Map<String, Object> payload = new HashMap<>();
-        payload.put( "allycode", allyCode );
-        payload.put( "roster", true );
-        payload.put( "enums", enums == null ? defaultEnums : enums );
-        payload.put( "language", language == null ? defaultLanguage : language.getSwgohCode() );
-
-        createProjection( payload, fields );
-
-        return API.guild.call( username, password, payload );
-    }
-
-    @Deprecated
-    @Override
-    public CompletableFuture<String> getGuildUnits( int allyCode, boolean includeMods, Boolean enums, Language language, GuildField... fields )
-    {
-        Map<String, Object> payload = new HashMap<>();
-        payload.put( "allycode", allyCode );
-        payload.put( "units", true );
-        payload.put( "mods", includeMods );
-        payload.put( "enums", enums == null ? defaultEnums : enums );
-        payload.put( "language", language == null ? defaultLanguage : language.getSwgohCode() );
-
-        createProjection( payload, fields );
-
-        return API.guild.call( username, password, payload );
+        return call( API.guilds, username, password, payload );
     }
 
     @Override
@@ -315,22 +274,7 @@ public class SwgohAPIClient implements SwgohAPI
 
         createProjection( payload, filter );
 
-        return API.roster.call( username, password, payload );
-    }
-
-    @Deprecated
-    @Override
-    public CompletableFuture<String> getUnits( List<Integer> allyCodes, boolean includeMods, Boolean enums, Language language, UnitsField... fields )
-    {
-        Map<String, Object> payload = new HashMap<>();
-        payload.put( "allycode", allyCodes );
-        payload.put( "mods", includeMods );
-        payload.put( "enums", enums == null ? defaultEnums : enums );
-        payload.put( "language", language == null ? defaultLanguage : language.getSwgohCode() );
-
-        createProjection( payload, fields );
-
-        return API.units.call( username, password, payload );
+        return call( API.roster, username, password, payload );
     }
 
     @Override
@@ -340,18 +284,7 @@ public class SwgohAPIClient implements SwgohAPI
 
         createProjection( payload, filter );
 
-        return API.zetas.call( username, password, payload );
-    }
-
-    @Deprecated
-    @Override
-    public CompletableFuture<String> getZetaRecommendations( ZetaRecommendationField... fields )
-    {
-        Map<String, Object> payload = new HashMap<>();
-
-        createProjection( payload, fields );
-
-        return API.zetas.call( username, password, payload );
+        return call( API.zetas, username, password, payload );
     }
 
     @Override
@@ -361,18 +294,7 @@ public class SwgohAPIClient implements SwgohAPI
 
         createProjection( payload, filter );
 
-        return API.squads.call( username, password, payload );
-    }
-
-    @Deprecated
-    @Override
-    public CompletableFuture<String> getSquadRecommendations( SquadRecommendationField... fields )
-    {
-        Map<String, Object> payload = new HashMap<>();
-
-        createProjection( payload, fields );
-
-        return API.squads.call( username, password, payload );
+        return call( API.squads, username, password, payload );
     }
 
     @Override
@@ -384,20 +306,7 @@ public class SwgohAPIClient implements SwgohAPI
 
         createProjection( payload, filter );
 
-        return API.events.call( username, password, payload );
-    }
-
-    @Deprecated
-    @Override
-    public CompletableFuture<String> getEvents( Boolean enums, Language language, EventField... fields )
-    {
-        Map<String, Object> payload = new HashMap<>();
-        payload.put( "enums", enums == null ? defaultEnums : enums );
-        payload.put( "language", language == null ? defaultLanguage : language.getSwgohCode() );
-
-        createProjection( payload, fields );
-
-        return API.events.call( username, password, payload );
+        return call( API.events, username, password, payload );
     }
 
     @Override
@@ -409,20 +318,7 @@ public class SwgohAPIClient implements SwgohAPI
 
         createProjection( payload, filter );
 
-        return API.battles.call( username, password, payload );
-    }
-
-    @Deprecated
-    @Override
-    public CompletableFuture<String> getBattles( Boolean enums, Language language, BattleField... fields )
-    {
-        Map<String, Object> payload = new HashMap<>();
-        payload.put( "enums", enums == null ? defaultEnums : enums );
-        payload.put( "language", language == null ? defaultLanguage : language.getSwgohCode() );
-
-        createProjection( payload, fields );
-
-        return API.battles.call( username, password, payload );
+        return call( API.battles, username, password, payload );
     }
 
     @Override
@@ -440,26 +336,7 @@ public class SwgohAPIClient implements SwgohAPI
 
         createProjection( payload, filter );
 
-        return API.data.call( username, password, payload );
-    }
-
-    @Deprecated
-    @Override
-    public CompletableFuture<String> getSupportData( Collection collection, Map<String, Object> matchCriteria, Boolean enums, Language language, String... fields )
-    {
-        Map<String, Object> payload = new HashMap<>();
-        payload.put( "collection", collection.name() );
-        payload.put( "enums", enums == null ? defaultEnums : enums );
-        payload.put( "language", language == null ? defaultLanguage : language.getSwgohCode() );
-
-        if ( matchCriteria != null )
-        {
-            payload.put( "match", matchCriteria );
-        }
-
-        createProjection( payload, fields );
-
-        return API.data.call( username, password, payload );
+        return call( API.data, username, password, payload );
     }
 
     @Override
@@ -478,7 +355,7 @@ public class SwgohAPIClient implements SwgohAPI
 
         payload.put( "put", mappings );
 
-        return API.registration.call( username, password, payload, RegistrationResponse.class );
+        return call( API.registration, username, password, payload, RegistrationResponse.class );
     }
 
     @Override
@@ -499,7 +376,7 @@ public class SwgohAPIClient implements SwgohAPI
 
         payload.put( "del", allyCodesOrDiscordIds );
 
-        return API.registration.call( username, password, payload, RegistrationResponse.class );
+        return call( API.registration, username, password, payload, RegistrationResponse.class );
     }
 
     @Override
@@ -508,7 +385,7 @@ public class SwgohAPIClient implements SwgohAPI
         Map<String, Object> payload = new HashMap<>();
         payload.put( "get", allyCodes );
 
-        return API.registration.call( username, password, payload, RegistrationResponse.class );
+        return call( API.registration, username, password, payload, RegistrationResponse.class );
     }
 
     @Override
@@ -517,178 +394,7 @@ public class SwgohAPIClient implements SwgohAPI
         Map<String, Object> payload = new HashMap<>();
         payload.put( "get", discordIds );
 
-        return API.registration.call( username, password, payload, RegistrationResponse.class );
-    }
-
-    @Override
-    public CompletableFuture<byte[]> getImage( ImageRequest imageRequest )
-    {
-        return CompletableFuture.supplyAsync( () -> {
-            try
-            {
-                if ( imageRequest instanceof ToonImageRequest )
-                {
-                    ToonImageRequest request = (ToonImageRequest) imageRequest;
-                    return getImage( getToonImageUrl( request.getBaseId(), getToonImageParameters( request ) ) );
-                }
-                else if ( imageRequest instanceof ShipImageRequest )
-                {
-                    ShipImageRequest request = (ShipImageRequest) imageRequest;
-                    return getImage( getShipImageUrl( request.getBaseId(), getShipImageParamters( request ) ) );
-                }
-
-                throw new IllegalArgumentException( "Invalid imageRequest" );
-            }
-            catch ( Exception exception )
-            {
-                throw new SwgohAPIException( "Unable to complete request.", exception );
-            }
-        } );
-    }
-
-    @Override
-    public CompletableFuture<BufferedImage> getBufferedImage( ImageRequest imageRequest )
-    {
-        return CompletableFuture.supplyAsync( () -> {
-            try
-            {
-                if ( imageRequest instanceof ToonImageRequest )
-                {
-                    ToonImageRequest request = (ToonImageRequest) imageRequest;
-                    return getBufferedImage( getToonImageUrl( request.getBaseId(), getToonImageParameters( request ) ) );
-                }
-                else if ( imageRequest instanceof ShipImageRequest )
-                {
-                    ShipImageRequest request = (ShipImageRequest) imageRequest;
-                    return getBufferedImage( getShipImageUrl( request.getBaseId(), getShipImageParamters( request ) ) );
-                }
-
-                throw new IllegalArgumentException( "Invalid imageRequest" );
-            }
-            catch ( Exception exception )
-            {
-                throw new SwgohAPIException( "Unable to complete request.", exception );
-            }
-        } );
-    }
-
-    private Map<String, Object> getToonImageParameters( ToonImageRequest toonImageRequest )
-    {
-        Map<String, Object> parameters = new HashMap<>();
-        if ( toonImageRequest.getGear() != null )
-        {
-            parameters.put( "gear", toonImageRequest.getGear().ordinal() + 1 );
-            if ( toonImageRequest.isDisplayRomanNumeral() )
-            {
-                parameters.put( "roman", toonImageRequest.getGear() );
-            }
-        }
-        if ( toonImageRequest.getLevel() != null )
-        {
-            parameters.put( "level", toonImageRequest.getLevel() );
-        }
-        if ( toonImageRequest.getRarity() != null )
-        {
-            parameters.put( "rarity", toonImageRequest.getRarity() );
-        }
-        if ( toonImageRequest.getZetas() != null )
-        {
-            parameters.put( "zetas", toonImageRequest.getZetas() );
-        }
-        if ( toonImageRequest.getBackgroundColor() != null )
-        {
-            String hex = Integer.toHexString( toonImageRequest.getBackgroundColor().getRGB() ).substring( 2 ).toUpperCase();
-            parameters.put( "bg", hex );
-        }
-
-        return parameters;
-    }
-
-    private Map<String, Object> getShipImageParamters( ShipImageRequest shipImageRequest )
-    {
-        Map<String, Object> parameters = new HashMap<>();
-        if ( shipImageRequest.getLevel() != null )
-        {
-            parameters.put( "level", shipImageRequest.getLevel() );
-        }
-        if ( shipImageRequest.getRarity() != null )
-        {
-            parameters.put( "rarity", shipImageRequest.getRarity() );
-        }
-        if ( shipImageRequest.getBackgroundColor() != null )
-        {
-            String hex = Integer.toHexString( shipImageRequest.getBackgroundColor().getRGB() ).substring( 2 ).toUpperCase();
-            parameters.put( "bg", hex );
-        }
-
-        StringBuilder pilots = new StringBuilder();
-        String prefix = "";
-        String delimiter = "-";
-        for ( ShipImageRequest.Pilot pilot : shipImageRequest.getPilots() )
-        {
-            pilots.append( prefix ).append( pilot.baseId ).append( delimiter ).append( pilot.rarity ).append( delimiter ).append( pilot.level ).append( delimiter ).append( pilot.gear ).append( delimiter ).append( pilot.zetas );
-            prefix = "%7C";
-        }
-
-        if ( pilots.length() > 0 )
-        {
-            parameters.put( "pilots", pilots.toString() );
-        }
-
-        return parameters;
-    }
-
-    private byte[] getImage( URL imageUrl ) throws IOException
-    {
-        try ( InputStream is = imageUrl.openStream() )
-        {
-            return IOUtils.toByteArray( is );
-        }
-    }
-
-    private BufferedImage getBufferedImage( URL imageUrl ) throws IOException
-    {
-        try ( InputStream is = imageUrl.openStream() )
-        {
-            return ImageIO.read( is );
-        }
-    }
-
-    private URL getToonImageUrl( String baseId, Map<String, Object> parameters ) throws MalformedURLException
-    {
-        return getImageUrl( baseId, false, parameters );
-    }
-
-    private URL getShipImageUrl( String baseId, Map<String, Object> parameters ) throws MalformedURLException
-    {
-        return getImageUrl( baseId, true, parameters );
-    }
-
-    private URL getImageUrl( String baseId, boolean isShip, Map<String, Object> parameters ) throws MalformedURLException
-    {
-        StringBuilder parameterString = new StringBuilder();
-        String prefix = "?";
-        for ( String key : parameters.keySet() )
-        {
-            parameterString.append( prefix ).append( key ).append( "=" ).append( parameters.get( key ) );
-            prefix = "&";
-        }
-
-        return new URL( API.URL_BASE + "/image/" + (isShip ? "ship" : "char") + "/" + baseId + parameterString );
-    }
-
-    private void createProjection( Map<String, Object> payload, Enum... fields )
-    {
-        if ( fields != null && fields.length > 0 )
-        {
-            List<String> stringFields = new ArrayList<>();
-            for ( Enum field : fields )
-            {
-                stringFields.add( field.name() );
-            }
-
-            createProjection( payload, stringFields.toArray( new String[]{} ) );
-        }
+        return call( API.registration, username, password, payload, RegistrationResponse.class );
     }
 
     private void createProjection( Map<String, Object> payload, SwgohAPIFilter filter )

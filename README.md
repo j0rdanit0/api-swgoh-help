@@ -142,33 +142,6 @@ Example of language-specified result:
 String jsonUnitsInKorean = api.getSupportData( SwgohAPI.Collection.unitsList, SwgohAPI.Language.Korean );
 ```
 
-# Image API
-Customized images of any unit in the game can be obtained through the construction of either a `ToonImageRequestBuilder` or a `ShipImageRequestBuilder`.
-
-```java
-//raw bytes of an image
-String baseId = "DARTHTRAYA"; //a full list of baseIds can be obtained through the "unitsList" collection
-byte[] bytes = api.getImage( 
-        new ToonImageRequestBuilder( baseId )
-        .withStars( 7 )
-        .withLevel( 85 )
-        .withGear( 12 )
-        .build()
-).get();
-```
-```java
-//image in the form of a BufferedImage
-String baseId = "TIEREAPER"; //a full list of baseIds can be obtained through the "unitsList" collection
-BufferedImage image = api.getBufferedImage(
-        new ShipImageRequestBuilder( baseId )
-        .withLevel( 50 )
-        .withStars( 5 )
-        .addPilot( "DEATHTROOPER", 85, 11, 7, null )
-        .addPilot( "SHORETROOPER", 75, 5, 5, null )
-        .build()
-).get();
-```
-
 # Spring Integration
 If you'd like to see this work with [Spring's dependency injection magic](https://docs.spring.io/spring/docs/current/spring-framework-reference/core.html#spring-core), simply write something similar to the following code:
 ```java

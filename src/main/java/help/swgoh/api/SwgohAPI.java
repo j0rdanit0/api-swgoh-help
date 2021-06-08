@@ -1,9 +1,7 @@
 package help.swgoh.api;
 
-import help.swgoh.api.image.ImageRequest;
 import help.swgoh.api.response.RegistrationResponse;
 
-import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -99,83 +97,6 @@ public interface SwgohAPI
     }
 
     /**
-     * Toggleable fields for the {@link #getPlayers(List, Boolean, Language, PlayerField...)} endpoints.
-     *
-     * @deprecated as of 4.1.0 in favor of the more versatile {@link SwgohAPIFilter} object.
-     */
-    @Deprecated
-    enum PlayerField
-    {
-        allyCode, name, level, guildName, guildRefId, stats, roster, arena, updated
-    }
-
-    /**
-     * Toggleable fields for the {@link #getGuild(int, Boolean, Language, GuildField...)} endpoints.
-     *
-     * @deprecated as of 4.1.0 in favor of the more versatile {@link SwgohAPIFilter} object.
-     */
-    @Deprecated
-    enum GuildField
-    {
-        name, id, desc, members, status, required, bannerColor, bannerLogo, message, gp, raid, roster, updated
-    }
-
-    /**
-     * Toggleable fields for the {@link #getUnits(List, boolean, Boolean, Language, UnitsField...)} endpoints.
-     *
-     * @deprecated as of 4.1.0 in favor of the more versatile {@link SwgohAPIFilter} object.
-     */
-    @Deprecated
-    enum UnitsField
-    {
-        player, allyCode, starLevel, level, gearLevel, gear, zetas, type, mods, gp, updated
-    }
-
-    /**
-     * Toggleable fields for the {@link #getZetaRecommendations(ZetaRecommendationField...)} endpoint.
-     *
-     * @deprecated as of 4.1.0 in favor of the more versatile {@link SwgohAPIFilter} object.
-     */
-    @Deprecated
-    enum ZetaRecommendationField
-    {
-        zetas, details, usage, credits, updated
-    }
-
-    /**
-     * Toggleable fields for the {@link #getSquadRecommendations(SquadRecommendationField...)} endpoint.
-     *
-     * @deprecated as of 4.1.0 in favor of the more versatile {@link SwgohAPIFilter} object.
-     */
-    @Deprecated
-    enum SquadRecommendationField
-    {
-        rancor, aat, haat, sith, events, twdefense, lstb, dstb, psummary, gsummary, updated
-    }
-
-    /**
-     * Toggleable fields for the {@link #getEvents(Boolean, Language, EventField...)} endpoints.
-     *
-     * @deprecated as of 4.1.0 in favor of the more versatile {@link SwgohAPIFilter} object.
-     */
-    @Deprecated
-    enum EventField
-    {
-        id, priority, nameKey, summaryKey, descKey, instances, squadType, defensiveSquadType, updated
-    }
-
-    /**
-     * Toggleable fields for the {@link #getBattles(Boolean, Language, BattleField...)} endpoints.
-     *
-     * @deprecated as of 4.1.0 in favor of the more versatile {@link SwgohAPIFilter} object.
-     */
-    @Deprecated
-    enum BattleField
-    {
-        id, nameKey, descriptionKey, campaignType, campaignMapList, updated
-    }
-
-    /**
      * Complete list of possible data collections that can be queried from the {@link #getSupportData(Collection, Map, Language, SwgohAPIFilter)} endpoints.
      */
     enum Collection
@@ -230,62 +151,6 @@ public interface SwgohAPI
     }
 
     /**
-     * Returns a list of player objects which are identified by the given ally code(s).
-     *
-     * Cache sync:
-     *   Registered user: 4 hours
-     *   Verified user: 2 hours
-     *   Patreon user: 1 hour
-     *
-     * https://api.swgoh.help/swgoh
-     *
-     * @param allyCodes Ally code(s) of the players to request.
-     * @param enums Optionally return enumerated items as their string equivalents.
-     * @param language Optional language to return translated names. If no language specified, no translations will be applied.
-     * @param fields Optional projection of {@link PlayerField}s you want returned. If no fields are specified, all fields will be returned.
-     * @return player data by individual or group of ally codes.
-     *
-     * @deprecated as of 4.1.0, use {@link #getPlayers(List, Language, SwgohAPIFilter)} instead.
-     */
-    @Deprecated
-    CompletableFuture<String> getPlayers( List<Integer> allyCodes, Boolean enums, Language language, PlayerField... fields );
-    @Deprecated
-    default CompletableFuture<String> getPlayers( List<Integer> allyCodes, Language language, PlayerField... fields )
-    {
-        return getPlayers( allyCodes, null, language, fields );
-    }
-    @Deprecated
-    default CompletableFuture<String> getPlayers( List<Integer> allyCodes, Boolean enums, PlayerField... fields )
-    {
-        return getPlayers( allyCodes, enums, null, fields );
-    }
-    @Deprecated
-    default CompletableFuture<String> getPlayers( List<Integer> allyCodes, PlayerField... fields )
-    {
-        return getPlayers( allyCodes, null, null, fields );
-    }
-    @Deprecated
-    default CompletableFuture<String> getPlayer( int allyCode, Boolean enums, Language language, PlayerField... fields )
-    {
-        return getPlayers( Collections.singletonList( allyCode ), enums, language, fields );
-    }
-    @Deprecated
-    default CompletableFuture<String> getPlayer( int allyCode, Language language, PlayerField... fields )
-    {
-        return getPlayer( allyCode, null, language, fields );
-    }
-    @Deprecated
-    default CompletableFuture<String> getPlayer( int allyCode, Boolean enums, PlayerField... fields )
-    {
-        return getPlayer( allyCode, enums, null, fields );
-    }
-    @Deprecated
-    default CompletableFuture<String> getPlayer( int allyCode, PlayerField... fields )
-    {
-        return getPlayer( allyCode, null, null, fields );
-    }
-
-    /**
      * Returns a guild object that contains only basic information for each guild member.
      *
      * For a full array of player profiles in the response, see {@link #getLargeGuild(int, Language, SwgohAPIFilter)}
@@ -314,45 +179,6 @@ public interface SwgohAPI
     default CompletableFuture<String> getGuild( int allyCode )
     {
         return getGuild( allyCode, SwgohAPIFilter.ALL );
-    }
-
-    /**
-     * Returns a guild object that contains only basic information for each guild member.
-     *
-     * For a full array of player profiles in the response, see {@link #getLargeGuild(int, Boolean, Language, GuildField...)}
-     * For a guild-wide units report instead of an array of player profiles, see {@link #getGuildUnits(int, boolean, Boolean, Language, GuildField...)}
-     *
-     * Cache sync:
-     *   Registered user: 6 hours
-     *   Verified user: 4 hours
-     *   Patreon user: 3 hours
-     *
-     * https://api.swgoh.help/swgoh
-     *
-     * @param allyCode Ally code of any guild member in guild to request.
-     * @param enums Optionally return enumerated items as their string equivalents.
-     * @param language Optional language to return translated names. If no language specified, no translations will be applied.
-     * @param fields Optional projection of {@link GuildField}s you want returned. If no fields are specified, all fields will be returned.
-     * @return guild data by individual ally code of guild member.
-     *
-     * @deprecated as of 4.1.0, use {@link #getGuild(int, Language, SwgohAPIFilter)} instead.
-     */
-    @Deprecated
-    CompletableFuture<String> getGuild( int allyCode, Boolean enums, Language language, GuildField... fields );
-    @Deprecated
-    default CompletableFuture<String> getGuild( int allyCode, Language language, GuildField... fields )
-    {
-        return getGuild( allyCode, null, language, fields );
-    }
-    @Deprecated
-    default CompletableFuture<String> getGuild( int allyCode, Boolean enums, GuildField... fields )
-    {
-        return getGuild( allyCode, enums, null, fields );
-    }
-    @Deprecated
-    default CompletableFuture<String> getGuild( int allyCode, GuildField... fields )
-    {
-        return getGuild( allyCode, null, null, fields );
     }
 
     /**
@@ -385,87 +211,6 @@ public interface SwgohAPI
     default CompletableFuture<String> getLargeGuild( int allyCode )
     {
         return getLargeGuild( allyCode, null, SwgohAPIFilter.ALL );
-    }
-
-    /**
-     * Returns a guild object that contains a full array of player profiles for each guild member.
-     * Note: Large reply object.
-     *
-     * For a basic view of the player roster, see {@link #getGuild(int, Boolean, Language, GuildField...)}
-     * For a guild-wide units report instead of an array of player profiles, see {@link #getGuildUnits(int, boolean, Boolean, Language, GuildField...)}
-     *
-     * Cache sync:
-     *   Registered user: 6 hours
-     *   Verified user: 4 hours
-     *   Patreon user: 3 hours
-     *
-     * https://api.swgoh.help/swgoh
-     *
-     * @param allyCode Ally code of any guild member in guild to request.
-     * @param enums Optionally return enumerated items as their string equivalents.
-     * @param language Optional language to return translated names. If no language specified, no translations will be applied.
-     * @param fields Optional projection of {@link GuildField}s you want returned. If no fields are specified, all fields will be returned.
-     * @return guild data by individual ally code of guild member.
-     *
-     * @deprecated as of 4.1.0, use {@link #getLargeGuild(int, Language, SwgohAPIFilter)} instead.
-     */
-    @Deprecated
-    CompletableFuture<String> getLargeGuild( int allyCode, Boolean enums, Language language, GuildField... fields );
-    @Deprecated
-    default CompletableFuture<String> getLargeGuild( int allyCode, Language language, GuildField... fields )
-    {
-        return getLargeGuild( allyCode, null, language, fields );
-    }
-    @Deprecated
-    default CompletableFuture<String> getLargeGuild( int allyCode, Boolean enums, GuildField... fields )
-    {
-        return getLargeGuild( allyCode, enums, null, fields );
-    }
-    @Deprecated
-    default CompletableFuture<String> getLargeGuild( int allyCode, GuildField... fields )
-    {
-        return getLargeGuild( allyCode, null, null, fields );
-    }
-
-    /**
-     * Returns a guild object that contains a units report for each guild member.
-     * Note: Large reply object.
-     *
-     * For a basic view of the player roster, see {@link #getGuild(int, Boolean, Language, GuildField...)}
-     * For a full array of player profiles in the response, see {@link #getLargeGuild(int, Boolean, Language, GuildField...)}
-     *
-     * Cache sync:
-     *   Registered user: 6 hours
-     *   Verified user: 4 hours
-     *   Patreon user: 3 hours
-     *
-     * https://api.swgoh.help/swgoh
-     *
-     * @param allyCode Ally code of any guild member in guild to request.
-     * @param includeMods Optionally include unit mods in units report. Note: Large reply object
-     * @param enums Optionally return enumerated items as their string equivalents.
-     * @param language Optional language to return translated names. If no language specified, no translations will be applied.
-     * @param fields Optional projection of {@link GuildField}s you want returned. If no fields are specified, all fields will be returned.
-     * @return guild data by individual ally code of guild member.
-     *
-     * @deprecated as of 4.1.0, use {@link #getLargeGuild(int, Language, SwgohAPIFilter)} intead.
-     */
-    @Deprecated
-    CompletableFuture<String> getGuildUnits( int allyCode, boolean includeMods, Boolean enums, Language language, GuildField... fields );
-    @Deprecated
-    default CompletableFuture<String> getGuildUnits( int allyCode, boolean includeMods, Language language, GuildField... fields )
-    {
-        return getGuildUnits( allyCode, includeMods, null, language, fields );
-    }
-    @Deprecated
-    default CompletableFuture<String> getGuildUnits( int allyCode, boolean includeMods, Boolean enums, GuildField... fields )
-    {
-        return getGuildUnits( allyCode, includeMods, enums, null, fields );
-    }
-    @Deprecated
-    default CompletableFuture<String> getGuildUnits( int allyCode, boolean includeMods, GuildField... fields )
-    {
-        return getGuildUnits( allyCode, includeMods, null, null, fields );
     }
 
     /**
@@ -517,63 +262,6 @@ public interface SwgohAPI
     }
 
     /**
-     * Returns a list of unit details organized by unit instead of by player, similar to the swgoh.gg /units API.
-     *
-     * Cache sync:
-     *   Registered user: 4 hours
-     *   Verified user: 2 hours
-     *   Patreon user: 1 hour
-     *
-     * https://api.swgoh.help/swgoh
-     *
-     * @param allyCodes Ally code(s) of the players to request.
-     * @param includeMods Optionally include unit-mods in report. Note: Large reply object
-     * @param enums Optionally return enumerated items as their string equivalents.
-     * @param language (in conjunction with mods) Optionally converts mod stat values to text.
-     * @param fields Optional projection of {@link UnitsField}s you want returned. If no fields are specified, all fields will be returned.
-     * @return player profiles organized by units for individual or group of ally codes.
-     *
-     * @deprecated as of 4.1.0, use {@link #getRosters(List, Language, SwgohAPIFilter)} instead.
-     */
-    @Deprecated
-    CompletableFuture<String> getUnits( List<Integer> allyCodes, boolean includeMods, Boolean enums, Language language, UnitsField... fields );
-    @Deprecated
-    default CompletableFuture<String> getUnits( List<Integer> allyCodes, boolean includeMods, Language language, UnitsField... fields )
-    {
-        return getUnits( allyCodes, includeMods, null, language, fields );
-    }
-    @Deprecated
-    default CompletableFuture<String> getUnits( List<Integer> allyCodes, boolean includeMods, Boolean enums, UnitsField... fields )
-    {
-        return getUnits( allyCodes, includeMods, enums, null, fields );
-    }
-    @Deprecated
-    default CompletableFuture<String> getUnits( List<Integer> allyCodes, boolean includeMods, UnitsField... fields )
-    {
-        return getUnits( allyCodes, includeMods, null, null, fields );
-    }
-    @Deprecated
-    default CompletableFuture<String> getUnits( int allyCode, boolean includeMods, Boolean enums, Language language, UnitsField... fields )
-    {
-        return getUnits( Collections.singletonList( allyCode ), includeMods, enums, language, fields );
-    }
-    @Deprecated
-    default CompletableFuture<String> getUnits( int allyCode, boolean includeMods, Language language, UnitsField... fields )
-    {
-        return getUnits( allyCode, includeMods, null, language, fields );
-    }
-    @Deprecated
-    default CompletableFuture<String> getUnits( int allyCode, boolean includeMods, Boolean enums, UnitsField... fields )
-    {
-        return getUnits( allyCode, includeMods, enums, null, fields );
-    }
-    @Deprecated
-    default CompletableFuture<String> getUnits( int allyCode, boolean includeMods, UnitsField... fields )
-    {
-        return getUnits( allyCode, includeMods, null, null, fields );
-    }
-
-    /**
      * Returns the current zeta list, rated by their various uses throughout the game.
      * This dataset is an aggregated summary of rankings collected through a grouping of krakens, whales, dolphins and free-to-players.
      * Note: This dataset is in the care of a third party and does not have available translations.
@@ -592,23 +280,6 @@ public interface SwgohAPI
     }
 
     /**
-     * Returns the current zeta list, rated by their various uses throughout the game.
-     * This dataset is an aggregated summary of rankings collected through a grouping of krakens, whales, dolphins and free-to-players.
-     * Note: This dataset is in the care of a third party and does not have available translations.
-     *
-     * Cache sync: 7 days
-     *
-     * https://api.swgoh.help/swgoh
-     *
-     * @param fields Optional projection of {@link ZetaRecommendationField}s you want returned. If no fields are specified, all fields will be returned.
-     * @return current zeta list, rated by their various uses throughout the game.
-     *
-     * @deprecated as of 4.1.0, use {@link #getZetaRecommendations(SwgohAPIFilter)} instead.
-     */
-    @Deprecated
-    CompletableFuture<String> getZetaRecommendations( ZetaRecommendationField... fields );
-
-    /**
      * Returns the current list of recommended squads, organized around their various uses throughout the game.
      * This dataset is provided by swgoh.help home-site and additions or changes can be requested in their Discord server. https://discord.gg/kau4XTB
      * Note: This dataset is in the care of a third party and does not have available translations.
@@ -625,23 +296,6 @@ public interface SwgohAPI
     {
         return getSquadRecommendations( SwgohAPIFilter.ALL );
     }
-
-    /**
-     * Returns the current list of recommended squads, organized around their various uses throughout the game.
-     * This dataset is provided by swgoh.help home-site and additions or changes can be requested in their Discord server. https://discord.gg/kau4XTB
-     * Note: This dataset is in the care of a third party and does not have available translations.
-     *
-     * Cache sync: 7 days
-     *
-     * https://api.swgoh.help/swgoh
-     *
-     * @param fields Optional projection of {@link SquadRecommendationField}s you want returned. If no fields are specified, all fields will be returned.
-     * @return current list of recommended squads, organized around their various uses throughout the game.
-     *
-     * @deprecated as of 4.1.0, use {@link #getSquadRecommendations(SwgohAPIFilter)} instead.
-     */
-    @Deprecated
-    CompletableFuture<String> getSquadRecommendations( SquadRecommendationField... fields );
 
     /**
      * Returns the current event schedule.
@@ -669,38 +323,6 @@ public interface SwgohAPI
     }
 
     /**
-     * Returns the current event schedule.
-     *
-     * Cache sync: 4 hours
-     *
-     * https://api.swgoh.help/swgoh
-     *
-     * @param enums Optionally return enumerated items as their string equivalents.
-     * @param language Optional language to return translated names. If no language specified, no translations will be applied.
-     * @param fields Optional projection of {@link EventField}s you want returned. If no fields are specified, all fields will be returned.
-     * @return current event schedule.
-     *
-     * @deprecated as of 4.1.0, use {@link #getEvents(Language, SwgohAPIFilter)} instead.
-     */
-    @Deprecated
-    CompletableFuture<String> getEvents( Boolean enums, Language language, EventField... fields );
-    @Deprecated
-    default CompletableFuture<String> getEvents( Language language, EventField... fields )
-    {
-        return getEvents( null, language, fields );
-    }
-    @Deprecated
-    default CompletableFuture<String> getEvents( Boolean enums, EventField... fields )
-    {
-        return getEvents( enums, null, fields );
-    }
-    @Deprecated
-    default CompletableFuture<String> getEvents( EventField... fields )
-    {
-        return getEvents( null, null, fields );
-    }
-
-    /**
      * Returns the current list of all campaigns, nodes and battle data.
      *
      * Cache sync: 4 hours
@@ -723,38 +345,6 @@ public interface SwgohAPI
     default CompletableFuture<String> getBattles()
     {
         return getBattles( null, SwgohAPIFilter.ALL );
-    }
-
-    /**
-     * Returns the current list of all campaigns, nodes and battle data.
-     *
-     * Cache sync: 4 hours
-     *
-     * https://api.swgoh.help/swgoh
-     *
-     * @param enums Optionally return enumerated items as their string equivalents.
-     * @param language Optional language to return translated names. If no language specified, no translations will be applied.
-     * @param fields Optional projection of {@link BattleField}s you want returned. If no fields are specified, all fields will be returned.
-     * @return current list of all campaigns, nodes and battle data.
-     *
-     * @deprecated as of 4.1.0, use {@link #getBattles(Language, SwgohAPIFilter)} instead.
-     */
-    @Deprecated
-    CompletableFuture<String> getBattles( Boolean enums, Language language, BattleField... fields );
-    @Deprecated
-    default CompletableFuture<String> getBattles( Language language, BattleField... fields )
-    {
-        return getBattles( null, language, fields );
-    }
-    @Deprecated
-    default CompletableFuture<String> getBattles( Boolean enums, BattleField... fields )
-    {
-        return getBattles( enums, null, fields );
-    }
-    @Deprecated
-    default CompletableFuture<String> getBattles( BattleField... fields )
-    {
-        return getBattles( null, null, fields );
     }
 
     /**
@@ -786,14 +376,6 @@ public interface SwgohAPI
     {
         return getSupportData( collection, matchCriteria, null, filter );
     }
-    /**
-     * @deprecated as of 4.2.0 - API now forces you to specify either a matchCriteria or a filter.
-     */
-    @Deprecated
-    default CompletableFuture<String> getSupportData( Collection collection, Language language )
-    {
-        return getSupportData( collection, null, language, SwgohAPIFilter.ALL );
-    }
     default CompletableFuture<String> getSupportData( Collection collection, SwgohAPIFilter filter )
     {
         return getSupportData( collection, null, null, filter );
@@ -801,71 +383,6 @@ public interface SwgohAPI
     default CompletableFuture<String> getSupportData( Collection collection, Map<String, Object> matchCriteria )
     {
         return getSupportData( collection, matchCriteria, null, SwgohAPIFilter.ALL );
-    }
-    /**
-     * @deprecated as of 4.2.0 - API now forces you to specify either a matchCriteria or a filter.
-     */
-    @Deprecated
-    default CompletableFuture<String> getSupportData( Collection collection )
-    {
-        return getSupportData( collection, null, null, SwgohAPIFilter.ALL );
-    }
-
-    /**
-     * Returns game data listings for organizing your tools and understanding relationships between data.
-     *
-     * The match criteria should be the {@code $match}'s body, according to mongodb specifications.
-     * https://docs.mongodb.com/manual/reference/operator/aggregation/match/
-     *
-     * Cache sync: on game updates
-     *
-     * https://api.swgoh.help/swgoh
-     *
-     * @param collection Name of the collection to access.
-     * @param matchCriteria Optionally include match criteria to filter down response.
-     * @param enums Optionally return enumerated items as their string equivalents.
-     * @param language Optional language to return translated names. If no language specified, no translations will be applied.
-     * @param fields Optional projection of fields you want returned. If no fields are specified, all fields will be returned.
-     * @return game data listings for organizing your tools and understanding relationships between data.
-     *
-     * @deprecated as of 4.1.0, use {@link #getSupportData(Collection, Map, Language, SwgohAPIFilter)} instead.
-     */
-    @Deprecated
-    CompletableFuture<String> getSupportData( Collection collection, Map<String, Object> matchCriteria, Boolean enums, Language language, String... fields );
-    @Deprecated
-    default CompletableFuture<String> getSupportData( Collection collection, Boolean enums, Language language, String... fields )
-    {
-        return getSupportData( collection, null, enums, language, fields );
-    }
-    @Deprecated
-    default CompletableFuture<String> getSupportData( Collection collection, Map<String, Object> matchCriteria, Language language, String... fields )
-    {
-        return getSupportData( collection, matchCriteria, null, language, fields );
-    }
-    @Deprecated
-    default CompletableFuture<String> getSupportData( Collection collection, Map<String, Object> matchCriteria, Boolean enums, String... fields )
-    {
-        return getSupportData( collection, matchCriteria, enums, null, fields );
-    }
-    @Deprecated
-    default CompletableFuture<String> getSupportData( Collection collection, Language language, String... fields )
-    {
-        return getSupportData( collection, null, null, language, fields );
-    }
-    @Deprecated
-    default CompletableFuture<String> getSupportData( Collection collection, Boolean enums, String... fields )
-    {
-        return getSupportData( collection, null, enums, null, fields );
-    }
-    @Deprecated
-    default CompletableFuture<String> getSupportData( Collection collection, Map<String, Object> matchCriteria, String... fields )
-    {
-        return getSupportData( collection, matchCriteria, null, null, fields );
-    }
-    @Deprecated
-    default CompletableFuture<String> getSupportData( Collection collection, String... fields )
-    {
-        return getSupportData( collection, null, null, null, fields );
     }
 
     /**
@@ -950,17 +467,4 @@ public interface SwgohAPI
     {
         return getRegistrationByDiscordIds( Collections.singletonList( discordId ) );
     }
-
-    /**
-     * Returns a unit image in PNG format, customized by the options provided by builders
-     * {@link help.swgoh.api.image.ToonImageRequestBuilder} or {@link help.swgoh.api.image.ShipImageRequestBuilder}.
-     *
-     * Once the builder's options are defined, its #build() method can be invoked to construct an implementation of
-     * {@link ImageRequest}.
-     *
-     * @param imageRequest The constructed request that can be used to customize the returned image.
-     * @return The customized image in PNG format.
-     */
-    CompletableFuture<byte[]> getImage( ImageRequest imageRequest );
-    CompletableFuture<BufferedImage> getBufferedImage( ImageRequest imageRequest );
 }

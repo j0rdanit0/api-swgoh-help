@@ -13,6 +13,20 @@ public class SwgohAPIBuilder
     private final SwgohAPISettings settings = new SwgohAPISettings();
 
     /**
+     * Defines the base URL upon which all request URLs are built.
+     *
+     * This field is optional. If not defined, the default is https://api.swgoh.help
+     *
+     * @param urlBase  The base URL upon which all request URLs are built
+     * @return The builder instance.
+     */
+    public SwgohAPIBuilder withUrlBase( String urlBase )
+    {
+        settings.setUrlBase( urlBase );
+        return this;
+    }
+
+    /**
      * Defines the username to be sent with the login request.
      *
      * @param username  The username to be sent with the login request

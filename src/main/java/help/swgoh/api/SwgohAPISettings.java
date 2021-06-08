@@ -4,10 +4,21 @@ import help.swgoh.api.exception.SwgohAPIException;
 
 public class SwgohAPISettings
 {
+    private String urlBase = "https://api.swgoh.help";
     private String username;
     private String password;
     private SwgohAPI.Language defaultLanguage;
     private Boolean defaultEnums;
+
+    public String getUrlBase()
+    {
+        return urlBase;
+    }
+
+    public void setUrlBase( String urlBase )
+    {
+        this.urlBase = urlBase;
+    }
 
     public String getUsername()
     {
@@ -51,22 +62,31 @@ public class SwgohAPISettings
 
     public void validate()
     {
-        if ( username == null || "".equals( username ) )
+        if ( urlBase == null || "".equals( urlBase ) )
         {
-            throw new SwgohAPIException( "username is required." );
+            throw new SwgohAPIException( "urlBase is required." );
         }
-        if ( password == null || "".equals( password ) )
+        boolean isUsernameUsed = ( username != null && !"".equals( username ) );
+        boolean isPasswordUsed = ( password != null && !"".equals( password ) );
+        if ( isUsernameUsed || isPasswordUsed )
         {
-            throw new SwgohAPIException( "password is required." );
+            if ( !isUsernameUsed )
+            {
+                throw new SwgohAPIException( "username is required." );
+            }
+            if ( !isPasswordUsed )
+            {
+                throw new SwgohAPIException( "password is required." );
+            }
         }
 
         try
         {
-            SwgohAPIClient.API.login( username, password );
+            SwgohAPIClient.login( urlBase, username, password );
         }
         catch ( Exception exception )
         {
-            throw new SwgohAPIException( "username and/or password are invalid.", exception );
+            throw new SwgohAPIException( "urlBase, username, or password are invalid or the host is inaccessible.", exception );
         }
     }
 }
