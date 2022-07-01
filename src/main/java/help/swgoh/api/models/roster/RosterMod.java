@@ -6,7 +6,7 @@ import java.util.Objects;
 /**
  * Represents a mod of a {@link RosterToon}.
  *
- * @since 1.0.0
+ * @since 4.3.1
  * @author doenisf
  */
 public class RosterMod {

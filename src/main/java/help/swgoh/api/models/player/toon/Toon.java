@@ -9,8 +9,8 @@ import java.util.Objects;
 /**
  * This class represents a single toon of a {@link help.swgoh.api.models.player.Player}.
  *
- * @author doenisf
  * @since 4.3.1
+ * @author doenisf
  */
 public class Toon {
 

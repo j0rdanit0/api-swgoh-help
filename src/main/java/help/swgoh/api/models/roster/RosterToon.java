@@ -7,7 +7,7 @@ import java.util.Objects;
 /**
  * Represents a single toon in the {@link Roster} class.
  *
- * @since 1.0.0
+ * @since 4.3.1
  * @author doenisf
  */
 public class RosterToon {
