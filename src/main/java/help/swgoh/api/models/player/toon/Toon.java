@@ -163,6 +163,26 @@ public class Toon {
         public void setCurrentTier(int currentTier) {
             this.currentTier = currentTier;
         }
+
+        @Override
+        public String toString() {
+            return "Relic{" +
+                    "currentTier=" + currentTier +
+                    '}';
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Relic relic = (Relic) o;
+            return currentTier == relic.currentTier;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(currentTier);
+        }
     }
 
     /**

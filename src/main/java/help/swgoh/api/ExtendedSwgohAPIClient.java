@@ -7,9 +7,17 @@ import help.swgoh.api.models.guild.Guild;
 import help.swgoh.api.models.player.Player;
 
 import java.io.StringReader;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+/**
+ * Extension of the {@link SwgohAPIClient} which implements the {@link ExtendedSwgohAPI}. Adds methods to retrieve the responses as objects instead of
+ * raw JSON {@code java.lang.String}s.
+ *
+ * @since 4.3.1
+ * @author doenisf
+ */
 public class ExtendedSwgohAPIClient extends SwgohAPIClient implements ExtendedSwgohAPI {
 
     ExtendedSwgohAPIClient(SwgohAPISettings settings) {
@@ -20,8 +28,7 @@ public class ExtendedSwgohAPIClient extends SwgohAPIClient implements ExtendedSw
 
         String responseString = super.getPlayers(allyCodes, language, filter).get();
 
-
-        return List.of(new Gson().fromJson(initReader(responseString), Player[].class));
+        return Arrays.asList(new Gson().fromJson(initReader(responseString), Player[].class));
     }
 
 
@@ -30,7 +37,7 @@ public class ExtendedSwgohAPIClient extends SwgohAPIClient implements ExtendedSw
 
         String responseString = super.getGuild(allyCode, language, filter).get();
 
-        return List.of(new Gson().fromJson(initReader(responseString), Guild[].class));
+        return Arrays.asList(new Gson().fromJson(initReader(responseString), Guild[].class));
     }
 
     @Override
@@ -38,7 +45,7 @@ public class ExtendedSwgohAPIClient extends SwgohAPIClient implements ExtendedSw
 
         String responseString = super.getLargeGuild(allyCode, language, filter).get();
 
-        return List.of(new Gson().fromJson(initReader(responseString), Guild[].class));
+        return Arrays.asList(new Gson().fromJson(initReader(responseString), Guild[].class));
     }
 
     // TODO: needs fixing
