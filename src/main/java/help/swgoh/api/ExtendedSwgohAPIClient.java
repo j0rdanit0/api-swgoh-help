@@ -18,6 +18,7 @@ import java.util.concurrent.ExecutionException;
  * @since 4.3.1
  * @author doenisf
  */
+@Deprecated
 public class ExtendedSwgohAPIClient extends SwgohAPIClient implements ExtendedSwgohAPI {
 
     ExtendedSwgohAPIClient(SwgohAPISettings settings) {

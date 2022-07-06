@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutionException;
  * @since 4.3.1
  * @author doenisf
  */
+@Deprecated
 public interface ExtendedSwgohAPI extends SwgohAPI {
 
     /**
