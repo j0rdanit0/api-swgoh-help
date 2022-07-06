@@ -1,5 +1,7 @@
 package help.swgoh.api.models.player.toon.mod;
 
+import help.swgoh.api.models.enums.UnitStat;
+
 import java.util.Objects;
 
 /**
@@ -10,14 +12,14 @@ import java.util.Objects;
  */
 public class PrimaryStat {
 
-    private ModStat unitStat;
+    private UnitStat unitStat;
     private float value;
 
-    public ModStat getUnitStat() {
+    public UnitStat getUnitStat() {
         return unitStat;
     }
 
-    public void setUnitStat(ModStat unitStat) {
+    public void setUnitStat(UnitStat unitStat) {
         this.unitStat = unitStat;
     }
 
