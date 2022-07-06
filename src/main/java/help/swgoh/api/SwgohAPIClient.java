@@ -412,9 +412,6 @@ public class SwgohAPIClient implements SwgohAPI {
         Player[] players = GSON.fromJson(initReader(responseString), Player[].class);
         List<PlayerRoster> rosters = new ArrayList<>();
         for (Player player : players) {
-            //PlayerRoster roster = new PlayerRoster();
-            //roster.setToons(player.getRoster());
-            //rosters.add(roster);
             rosters.add(player.getPlayerRoster());
         }
         return rosters;
