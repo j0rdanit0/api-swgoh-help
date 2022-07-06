@@ -592,6 +592,9 @@ public interface SwgohAPI {
     }
 
     /**
+     * An improved version of the {@link #getRosters(List, Language, SwgohAPIFilter)} method, which instead of a raw JSON as a
+     * {@code java.lang.String} responds with an {@link List} of {@link PlayerRoster}s.
+     *
      * Cache sync:
      * Registered user: 4 hours
      * Verified user: 2 hours
