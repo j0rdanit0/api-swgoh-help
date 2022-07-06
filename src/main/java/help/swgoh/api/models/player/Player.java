@@ -28,6 +28,7 @@ public class Player {
     private String guildTypeId;
     private Stat[] stats;
     private Toon[] roster;
+    private PlayerRoster playerRoster;
     private PlayerArenaStats arena;
     private BigInteger lastActivity;
     private BigInteger poUTCOffsetMinutes;
@@ -109,6 +110,10 @@ public class Player {
         this.guildBannerLogo = guildBannerLogo;
     }
 
+    public void setGuildBannerLogo(String guildBannerLogo) {
+        this.guildBannerLogo = guildBannerLogo;
+    }
+
     public String getGuildTypeId() {
         return guildTypeId;
     }
@@ -131,6 +136,15 @@ public class Player {
 
     public void setRoster(Toon[] roster) {
         this.roster = roster;
+    }
+
+    public PlayerRoster getPlayerRoster() {
+        initPlayerRoster(roster);
+        return playerRoster;
+    }
+
+    public void setPlayerRoster(PlayerRoster playerRoster) {
+        this.playerRoster = playerRoster;
     }
 
     public PlayerArenaStats getArena() {
@@ -189,6 +203,29 @@ public class Player {
         this.updated = updated;
     }
 
+    /* Supporting methods */
+    private void initPlayerRoster(Toon[] toons) {
+        this.playerRoster = new PlayerRoster();
+        playerRoster.setToons(toons);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Player player = (Player) o;
+        return Objects.equals(allyCode, player.allyCode) && Objects.equals(id, player.id) && Objects.equals(name, player.name) && Objects.equals(level, player.level) && Objects.equals(titles, player.titles) && Objects.equals(guildRefId, player.guildRefId) && Objects.equals(guildName, player.guildName) && Objects.equals(guildBannerColor, player.guildBannerColor) && Objects.equals(guildBannerLogo, player.guildBannerLogo) && Objects.equals(guildTypeId, player.guildTypeId) && Arrays.equals(stats, player.stats) && Arrays.equals(roster, player.roster) && Objects.equals(playerRoster, player.playerRoster) && Objects.equals(arena, player.arena) && Objects.equals(lastActivity, player.lastActivity) && Objects.equals(poUTCOffsetMinutes, player.poUTCOffsetMinutes) && Objects.equals(portraits, player.portraits) && Arrays.equals(grandArena, player.grandArena) && Objects.equals(grandArenaLifeTime, player.grandArenaLifeTime) && Objects.equals(updated, player.updated);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(allyCode, id, name, level, titles, guildRefId, guildName, guildBannerColor, guildBannerLogo, guildTypeId, playerRoster, arena, lastActivity, poUTCOffsetMinutes, portraits, grandArenaLifeTime, updated);
+        result = 31 * result + Arrays.hashCode(stats);
+        result = 31 * result + Arrays.hashCode(roster);
+        result = 31 * result + Arrays.hashCode(grandArena);
+        return result;
+    }
+
     @Override
     public String toString() {
         return "Player{" +
@@ -200,37 +237,18 @@ public class Player {
                 ", guildRefId='" + guildRefId + '\'' +
                 ", guildName='" + guildName + '\'' +
                 ", guildBannerColor='" + guildBannerColor + '\'' +
-                ", getGuildBannerLogo='" + guildBannerLogo + '\'' +
+                ", guildBannerLogo='" + guildBannerLogo + '\'' +
                 ", guildTypeId='" + guildTypeId + '\'' +
                 ", stats=" + Arrays.toString(stats) +
                 ", roster=" + Arrays.toString(roster) +
+                ", playerRoster=" + playerRoster +
                 ", arena=" + arena +
                 ", lastActivity=" + lastActivity +
                 ", poUTCOffsetMinutes=" + poUTCOffsetMinutes +
                 ", portraits=" + portraits +
                 ", grandArena=" + Arrays.toString(grandArena) +
-                ", grandArenaLifetime=" + grandArenaLifeTime +
+                ", grandArenaLifeTime=" + grandArenaLifeTime +
                 ", updated=" + updated +
                 '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Player player = (Player) o;
-        return Objects.equals(allyCode, player.allyCode) && Objects.equals(id, player.id) && Objects.equals(name, player.name) && Objects.equals(level, player.level) && Objects.equals(titles, player.titles) && Objects.equals(guildRefId, player.guildRefId) && Objects.equals(guildName, player.guildName) && Objects.equals(guildBannerColor, player.guildBannerColor) && Objects.equals(guildBannerLogo, player.guildBannerLogo) && Objects.equals(guildTypeId, player.guildTypeId) && Arrays.equals(stats, player.stats) && Arrays.equals(roster, player.roster) && Objects.equals(arena, player.arena) && Objects.equals(lastActivity, player.lastActivity) && Objects.equals(poUTCOffsetMinutes, player.poUTCOffsetMinutes) && Objects.equals(portraits, player.portraits) && Arrays.equals(grandArena, player.grandArena) && Objects.equals(grandArenaLifeTime, player.grandArenaLifeTime) && Objects.equals(updated, player.updated);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = Objects.hash(allyCode, id, name, level,
-                titles, guildRefId, guildName, guildBannerColor,
-                guildBannerLogo, guildTypeId, arena, lastActivity,
-                poUTCOffsetMinutes, portraits, grandArenaLifeTime, updated);
-        result = 31 * result + Arrays.hashCode(stats);
-        result = 31 * result + Arrays.hashCode(roster);
-        result = 31 * result + Arrays.hashCode(grandArena);
-        return result;
     }
 }
