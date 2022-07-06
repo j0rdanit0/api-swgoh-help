@@ -19,6 +19,7 @@ public enum ModStat {
     OFFENCE_PERCENT(48, "%-Offense"),
     DEFENSE_PERCENT(49, "%-Defense"),
     CRIT_CHANCE(53,"Critical Chance"),
+    CRIT_AVOIDANCE(54, "Critical Avoidance"),
     HEALTH_PERCENT(55, "%-Health"),
     PROTECTION_PERCENT(56, "%-Protection");
 
