@@ -5,19 +5,19 @@ import java.util.Objects;
 /**
  * This class represents a primary stat of a {@link Mod}.
  *
- * @since 1.0.0
+ * @since 4.3.1
  * @author doenisf
  */
 public class PrimaryStat {
 
-    private int unitStat;
+    private ModStat unitStat;
     private float value;
 
-    public int getUnitStat() {
+    public ModStat getUnitStat() {
         return unitStat;
     }
 
-    public void setUnitStat(int unitStat) {
+    public void setUnitStat(ModStat unitStat) {
         this.unitStat = unitStat;
     }
 
@@ -34,7 +34,7 @@ public class PrimaryStat {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PrimaryStat that = (PrimaryStat) o;
-        return unitStat == that.unitStat && Float.compare(that.value, value) == 0;
+        return Float.compare(that.value, value) == 0 && unitStat == that.unitStat;
     }
 
     @Override
