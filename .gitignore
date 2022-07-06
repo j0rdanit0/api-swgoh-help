@@ -3,3 +3,4 @@
 *.releaseBackup
 release.properties
 /src/test/java/*
+/src/test/resources/*

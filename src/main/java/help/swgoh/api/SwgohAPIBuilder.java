@@ -86,4 +86,17 @@ public class SwgohAPIBuilder
         settings.validate();
         return new SwgohAPIClient( settings );
     }
+
+    /**
+     * Validate the {@link SwgohAPISettings} object and construct a new {@link ExtendedSwgohAPIClient} instance with it.
+     *
+     * @return The new client with the configuration specified by this builder.
+     * @throws SwgohAPIException if the validation of the settings object fails.
+     * @see SwgohAPISettings#validate()
+     */
+    public ExtendedSwgohAPI buildExtended()
+    {
+        settings.validate();
+        return new ExtendedSwgohAPIClient(settings);
+    }
 }
