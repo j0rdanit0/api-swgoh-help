@@ -1,11 +1,15 @@
 package help.swgoh.api;
 
 import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
 import help.swgoh.api.exception.SwgohAPIDuplicateRequestException;
 import help.swgoh.api.exception.SwgohAPIException;
 import help.swgoh.api.exception.SwgohAPINotFoundException;
 import help.swgoh.api.exception.SwgohAPIRateLimitException;
 import help.swgoh.api.exception.SwgohAPITimeoutException;
+import help.swgoh.api.models.event.Events;
+import help.swgoh.api.models.guild.Guild;
+import help.swgoh.api.models.player.Player;
 import help.swgoh.api.response.RegistrationResponse;
 
 import java.io.*;
@@ -13,14 +17,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.zip.GZIPInputStream;
 
 public class SwgohAPIClient implements SwgohAPI
@@ -434,5 +432,45 @@ public class SwgohAPIClient implements SwgohAPI
             }
             payload.put( "project", fieldsMap );
         }
+    }
+
+    public List<Player> getFullPlayers(List<Integer> allyCodes, Language language, SwgohAPIFilter filter) throws ExecutionException, InterruptedException {
+
+        String responseString = getPlayers(allyCodes, language, filter).get();
+
+        return Arrays.asList(new Gson().fromJson(initReader(responseString), Player[].class));
+    }
+
+
+    @Override
+    public List<Guild> getFullGuild(int allyCode, Language language, SwgohAPIFilter filter) throws ExecutionException, InterruptedException {
+
+        String responseString = getGuild(allyCode, language, filter).get();
+
+        return Arrays.asList(new Gson().fromJson(initReader(responseString), Guild[].class));
+    }
+
+    @Override
+    public List<Guild> getFullLargeGuild(int allyCode, Language language, SwgohAPIFilter filter) throws ExecutionException, InterruptedException {
+
+        String responseString = getLargeGuild(allyCode, language, filter).get();
+
+        return Arrays.asList(new Gson().fromJson(initReader(responseString), Guild[].class));
+    }
+
+    @Override
+    public Events getFullEvents(Language language, SwgohAPIFilter filter) throws ExecutionException, InterruptedException {
+
+        String responseString = getEvents(language, filter).get();
+
+        return new Gson().fromJson(initReader(responseString), Events.class);
+    }
+
+    private JsonReader initReader(String input) {
+
+        JsonReader jsonReader = new JsonReader(new StringReader(input));
+        jsonReader.setLenient(true);
+
+        return jsonReader;
     }
 }

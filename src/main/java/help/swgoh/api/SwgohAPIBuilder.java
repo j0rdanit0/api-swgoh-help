@@ -94,6 +94,7 @@ public class SwgohAPIBuilder
      * @throws SwgohAPIException if the validation of the settings object fails.
      * @see SwgohAPISettings#validate()
      */
+    @Deprecated
     public ExtendedSwgohAPI buildExtended()
     {
         settings.validate();

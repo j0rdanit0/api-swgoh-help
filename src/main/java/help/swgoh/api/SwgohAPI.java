@@ -1,5 +1,8 @@
 package help.swgoh.api;
 
+import help.swgoh.api.models.event.Events;
+import help.swgoh.api.models.guild.Guild;
+import help.swgoh.api.models.player.Player;
 import help.swgoh.api.response.RegistrationResponse;
 
 import java.util.Arrays;
@@ -9,6 +12,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Interface that exposes the public methods of {@link SwgohAPIClient}.
@@ -466,5 +470,120 @@ public interface SwgohAPI
     default CompletableFuture<RegistrationResponse> getRegistrationByDiscordId( String discordId )
     {
         return getRegistrationByDiscordIds( Collections.singletonList( discordId ) );
+    }
+
+
+    /**
+     * Returns a list of player objects which are identified by the given ally code(s).
+     *
+     * Cache sync:
+     *   Registered user: 4 hours
+     *   Verified user: 2 hours
+     *   Patreon user: 1 hour
+     *
+     * https://api.swgoh.help/swgoh
+     *
+     * @param allyCodes Ally code(s) of the players to request.
+     * @param language Optional language to return translated names. If no language specified, no translations will be applied.
+     * @param filter Optional projection of response fields you want returned. If no fields are specified, all fields will be returned.
+     * @return player data by individual or group of ally codes.
+     */
+    List<Player> getFullPlayers(List<Integer> allyCodes, Language language, SwgohAPIFilter filter) throws ExecutionException, InterruptedException;
+    default List<Player> getFullPlayers(List<Integer> allyCodes, SwgohAPIFilter filter ) throws ExecutionException, InterruptedException {
+        return getFullPlayers( allyCodes, null, filter );
+    }
+    default List<Player> getFullPlayers( List<Integer> allyCodes ) throws ExecutionException, InterruptedException {
+        return getFullPlayers( allyCodes, null, SwgohAPIFilter.ALL );
+    }
+    default Player getFullPlayer( int allyCode, Language language, SwgohAPIFilter filter ) throws ExecutionException, InterruptedException {
+        return getFullPlayers( Collections.singletonList( allyCode ), language, filter ).get(0);
+    }
+    default Player getFullPlayer( int allyCode, Language language ) throws ExecutionException, InterruptedException {
+        return getFullPlayer( allyCode, language, SwgohAPIFilter.ALL );
+    }
+    default Player getFullPlayer( int allyCode, SwgohAPIFilter filter ) throws ExecutionException, InterruptedException {
+        return getFullPlayer( allyCode, null, filter );
+    }
+    default Player getFullPlayer( int allyCode ) throws ExecutionException, InterruptedException {
+        return getFullPlayer( allyCode, null, SwgohAPIFilter.ALL );
+    }
+
+    /**
+     * Returns a guild object that contains only basic information for each guild member.
+     *
+     * For a full array of player profiles in the response, see {@link #getFullLargeGuild(int, Language, SwgohAPIFilter)}
+     *
+     * Cache sync:
+     *   Registered user: 6 hours
+     *   Verified user: 4 hours
+     *   Patreon user: 3 hours
+     *
+     * https://api.swgoh.help/swgoh
+     *
+     * @param allyCode Ally code of any guild member in guild to request.
+     * @param language Optional language to return translated names. If no language specified, no translations will be applied.
+     * @param filter Optional projection of response fields you want returned. If no fields are specified, all fields will be returned.
+     * @return guild data by individual ally code of guild member.
+     */
+    List<Guild> getFullGuild(int allyCode, Language language, SwgohAPIFilter filter ) throws ExecutionException, InterruptedException;
+    default List<Guild> getFullGuild( int allyCode, Language language ) throws ExecutionException, InterruptedException {
+        return getFullGuild( allyCode, language, SwgohAPIFilter.ALL );
+    }
+    default List<Guild> getFullGuild( int allyCode, SwgohAPIFilter filter ) throws ExecutionException, InterruptedException {
+        return getFullGuild( allyCode, null, filter );
+    }
+    default List<Guild> getFullGuild( int allyCode ) throws ExecutionException, InterruptedException {
+        return getFullGuild( allyCode, SwgohAPIFilter.ALL );
+    }
+
+    /**
+     * Returns a guild object that contains a full array of player profiles for each guild member.
+     * Note: Large reply object.
+     *
+     * For a basic view of the player roster, see {@link #getGuild(int, Language, SwgohAPIFilter)}
+     *
+     * Cache sync:
+     *   Registered user: 6 hours
+     *   Verified user: 4 hours
+     *   Patreon user: 3 hours
+     *
+     * https://api.swgoh.help/swgoh
+     *
+     * @param allyCode Ally code of any guild member in guild to request.
+     * @param language Optional language to return translated names. If no language specified, no translations will be applied.
+     * @param filter Optional projection of response fields you want returned. If no fields are specified, all fields will be returned.
+     * @return guild data by individual ally code of guild member.
+     */
+    List<Guild> getFullLargeGuild( int allyCode, Language language, SwgohAPIFilter filter ) throws ExecutionException, InterruptedException;
+    default List<Guild> getFullLargeGuild( int allyCode, SwgohAPIFilter filter ) throws ExecutionException, InterruptedException {
+        return getFullLargeGuild( allyCode, null, filter );
+    }
+    default List<Guild> getFullLargeGuild( int allyCode, Language language ) throws ExecutionException, InterruptedException {
+        return getFullLargeGuild( allyCode, language, SwgohAPIFilter.ALL );
+    }
+    default List<Guild> getFullLargeGuild( int allyCode ) throws ExecutionException, InterruptedException {
+        return getFullLargeGuild( allyCode, null, SwgohAPIFilter.ALL );
+    }
+
+    /**
+     * Returns the current event schedule.
+     *
+     * Cache sync: 4 hours
+     *
+     * https://api.swgoh.help/swgoh
+     *
+     * @param language Optional language to return translated names. If no language specified, no translations will be applied.
+     * @param filter Optional projection of response fields you want returned. If no fields are specified, all fields will be returned.
+     * @return current event schedule.
+     */
+    Events getFullEvents(Language language, SwgohAPIFilter filter ) throws ExecutionException, InterruptedException;
+    default Events getFullEvents(Language language ) throws ExecutionException, InterruptedException {
+        return getFullEvents( language, SwgohAPIFilter.ALL );
+    }
+    default Events getFullEvents( SwgohAPIFilter filter ) throws ExecutionException, InterruptedException {
+        return getFullEvents( null, filter );
+    }
+    default Events getFullEvents() throws ExecutionException, InterruptedException {
+        return getFullEvents( null, SwgohAPIFilter.ALL );
     }
 }
