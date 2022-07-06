@@ -17,8 +17,8 @@ public class Mod {
     private int slot;
     private int set;
     private int pips;
-    private PrimaryStat primaryStat;
-    private SecondaryStat[] secondaryStat;
+    private ModStat primaryStat;
+    private ModStat[] secondaryStat;
 
     public String getId() {
         return id;
@@ -68,19 +68,19 @@ public class Mod {
         this.pips = pips;
     }
 
-    public PrimaryStat getPrimaryStat() {
+    public ModStat getPrimaryStat() {
         return primaryStat;
     }
 
-    public void setPrimaryStat(PrimaryStat primaryStat) {
+    public void setPrimaryStat(ModStat primaryStat) {
         this.primaryStat = primaryStat;
     }
 
-    public SecondaryStat[] getSecondaryStat() {
+    public ModStat[] getSecondaryStat() {
         return secondaryStat;
     }
 
-    public void setSecondaryStat(SecondaryStat[] secondaryStat) {
+    public void setSecondaryStat(ModStat[] secondaryStat) {
         this.secondaryStat = secondaryStat;
     }
 

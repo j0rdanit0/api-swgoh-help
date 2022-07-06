@@ -5,15 +5,16 @@ import help.swgoh.api.models.enums.UnitStat;
 import java.util.Objects;
 
 /**
- * This class represents a primary stat of a {@link Mod}.
+ * This class represents one stat of a {@link Mod}.
  *
  * @since 4.3.1
  * @author doenisf
  */
-public class PrimaryStat {
+public class ModStat {
 
     private UnitStat unitStat;
     private float value;
+    private int roll;
 
     public UnitStat getUnitStat() {
         return unitStat;
@@ -31,24 +32,33 @@ public class PrimaryStat {
         this.value = value;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        PrimaryStat that = (PrimaryStat) o;
-        return Float.compare(that.value, value) == 0 && unitStat == that.unitStat;
+    public int getRoll() {
+        return roll;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(unitStat, value);
+    public void setRoll(int roll) {
+        this.roll = roll;
     }
 
     @Override
     public String toString() {
-        return "PrimaryStat{" +
+        return "ModStat{" +
                 "unitStat=" + unitStat +
                 ", value=" + value +
+                ", roll=" + roll +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ModStat that = (ModStat) o;
+        return Float.compare(that.value, value) == 0 && roll == that.roll && unitStat == that.unitStat;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(unitStat, value, roll);
     }
 }
