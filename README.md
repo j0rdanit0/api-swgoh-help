@@ -116,6 +116,19 @@ String discordId = "098765432123456789";
 api.unregisterDiscordId( discordId );
 ```
 
+From version 4.3.1 onwards, there are model classes and new methods to get the response as Java objects instead of raw JSON Strings.
+```java
+// Example usage of the Player class
+int allyCode = 123456789;
+try {
+    Player player = api.getFullPlayer(allyCode);    
+} catch (InterruptedException e) {
+    // do stuff with the exception
+} catch (ExecutionException e) {
+    // do stuff with the exception
+}
+```
+
 In order to use this feature, your API account will need to upgrade to Patreon-tier.
 
 You can do this by becoming a Patreon patron and supporting the API in any of the following ways:<br/>
