@@ -477,29 +477,29 @@ public interface SwgohAPI {
      * @param filter    Optional projection of response fields you want returned. If no fields are specified, all fields will be returned.
      * @return player data by individual or group of ally codes.
      */
-    List<Player> getFullPlayers(List<Integer> allyCodes, Language language, SwgohAPIFilter filter) throws ExecutionException, InterruptedException;
+    CompletableFuture<List<Player>> getFullPlayers(List<Integer> allyCodes, Language language, SwgohAPIFilter filter);
 
-    default List<Player> getFullPlayers(List<Integer> allyCodes, SwgohAPIFilter filter) throws ExecutionException, InterruptedException {
+    default CompletableFuture<List<Player>> getFullPlayers(List<Integer> allyCodes, SwgohAPIFilter filter) {
         return getFullPlayers(allyCodes, null, filter);
     }
 
-    default List<Player> getFullPlayers(List<Integer> allyCodes) throws ExecutionException, InterruptedException {
+    default CompletableFuture<List<Player>> getFullPlayers(List<Integer> allyCodes) {
         return getFullPlayers(allyCodes, null, SwgohAPIFilter.ALL);
     }
 
-    default Player getFullPlayer(int allyCode, Language language, SwgohAPIFilter filter) throws ExecutionException, InterruptedException {
-        return getFullPlayers(Collections.singletonList(allyCode), language, filter).get(0);
+    default CompletableFuture<List<Player>> getFullPlayer(int allyCode, Language language, SwgohAPIFilter filter) {
+        return getFullPlayers(Collections.singletonList(allyCode), language, filter);
     }
 
-    default Player getFullPlayer(int allyCode, Language language) throws ExecutionException, InterruptedException {
+    default CompletableFuture<List<Player>> getFullPlayer(int allyCode, Language language) {
         return getFullPlayer(allyCode, language, SwgohAPIFilter.ALL);
     }
 
-    default Player getFullPlayer(int allyCode, SwgohAPIFilter filter) throws ExecutionException, InterruptedException {
+    default CompletableFuture<List<Player>> getFullPlayer(int allyCode, SwgohAPIFilter filter) {
         return getFullPlayer(allyCode, null, filter);
     }
 
-    default Player getFullPlayer(int allyCode) throws ExecutionException, InterruptedException {
+    default CompletableFuture<List<Player>> getFullPlayer(int allyCode) throws ExecutionException, InterruptedException {
         return getFullPlayer(allyCode, null, SwgohAPIFilter.ALL);
     }
 
@@ -520,17 +520,17 @@ public interface SwgohAPI {
      * @param filter   Optional projection of response fields you want returned. If no fields are specified, all fields will be returned.
      * @return guild data by individual ally code of guild member.
      */
-    List<Guild> getFullGuild(int allyCode, Language language, SwgohAPIFilter filter) throws ExecutionException, InterruptedException;
+    CompletableFuture<List<Guild>> getFullGuild(int allyCode, Language language, SwgohAPIFilter filter);
 
-    default List<Guild> getFullGuild(int allyCode, Language language) throws ExecutionException, InterruptedException {
+    default CompletableFuture<List<Guild>> getFullGuild(int allyCode, Language language) {
         return getFullGuild(allyCode, language, SwgohAPIFilter.ALL);
     }
 
-    default List<Guild> getFullGuild(int allyCode, SwgohAPIFilter filter) throws ExecutionException, InterruptedException {
+    default CompletableFuture<List<Guild>> getFullGuild(int allyCode, SwgohAPIFilter filter) {
         return getFullGuild(allyCode, null, filter);
     }
 
-    default List<Guild> getFullGuild(int allyCode) throws ExecutionException, InterruptedException {
+    default CompletableFuture<List<Guild>> getFullGuild(int allyCode) {
         return getFullGuild(allyCode, SwgohAPIFilter.ALL);
     }
 
@@ -552,17 +552,17 @@ public interface SwgohAPI {
      * @param filter   Optional projection of response fields you want returned. If no fields are specified, all fields will be returned.
      * @return guild data by individual ally code of guild member.
      */
-    List<Guild> getFullLargeGuild(int allyCode, Language language, SwgohAPIFilter filter) throws ExecutionException, InterruptedException;
+    CompletableFuture<List<Guild>> getFullLargeGuild(int allyCode, Language language, SwgohAPIFilter filter);
 
-    default List<Guild> getFullLargeGuild(int allyCode, SwgohAPIFilter filter) throws ExecutionException, InterruptedException {
+    default CompletableFuture<List<Guild>> getFullLargeGuild(int allyCode, SwgohAPIFilter filter) {
         return getFullLargeGuild(allyCode, null, filter);
     }
 
-    default List<Guild> getFullLargeGuild(int allyCode, Language language) throws ExecutionException, InterruptedException {
+    default CompletableFuture<List<Guild>> getFullLargeGuild(int allyCode, Language language) {
         return getFullLargeGuild(allyCode, language, SwgohAPIFilter.ALL);
     }
 
-    default List<Guild> getFullLargeGuild(int allyCode) throws ExecutionException, InterruptedException {
+    default CompletableFuture<List<Guild>> getFullLargeGuild(int allyCode) {
         return getFullLargeGuild(allyCode, null, SwgohAPIFilter.ALL);
     }
 
@@ -577,24 +577,24 @@ public interface SwgohAPI {
      * @param filter   Optional projection of response fields you want returned. If no fields are specified, all fields will be returned.
      * @return current event schedule.
      */
-    Events getFullEvents(Language language, SwgohAPIFilter filter) throws ExecutionException, InterruptedException;
+    CompletableFuture<Events> getFullEvents(Language language, SwgohAPIFilter filter);
 
-    default Events getFullEvents(Language language) throws ExecutionException, InterruptedException {
+    default CompletableFuture<Events> getFullEvents(Language language) {
         return getFullEvents(language, SwgohAPIFilter.ALL);
     }
 
-    default Events getFullEvents(SwgohAPIFilter filter) throws ExecutionException, InterruptedException {
+    default CompletableFuture<Events> getFullEvents(SwgohAPIFilter filter) {
         return getFullEvents(null, filter);
     }
 
-    default Events getFullEvents() throws ExecutionException, InterruptedException {
+    default CompletableFuture<Events> getFullEvents() {
         return getFullEvents(null, SwgohAPIFilter.ALL);
     }
 
     /**
      * An improved version of the {@link #getRosters(List, Language, SwgohAPIFilter)} method, which instead of a raw JSON as a
      * {@code java.lang.String} responds with an {@link List} of {@link PlayerRoster}s.
-     *
+     * <p>
      * Cache sync:
      * Registered user: 4 hours
      * Verified user: 2 hours
@@ -632,5 +632,6 @@ public interface SwgohAPI {
     default PlayerRoster getImprovedRoster(int allyCode) throws ExecutionException, InterruptedException {
         return getImprovedRoster(allyCode, null, SwgohAPIFilter.ALL);
     }
+
 
 }

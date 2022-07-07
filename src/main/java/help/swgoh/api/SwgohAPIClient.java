@@ -1,6 +1,7 @@
 package help.swgoh.api;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import help.swgoh.api.exception.SwgohAPIDuplicateRequestException;
 import help.swgoh.api.exception.SwgohAPIException;
@@ -14,6 +15,7 @@ import help.swgoh.api.models.player.PlayerRoster;
 import help.swgoh.api.response.RegistrationResponse;
 
 import java.io.*;
+import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -70,6 +72,10 @@ public class SwgohAPIClient implements SwgohAPI {
     }
 
     public <T> CompletableFuture<T> call(API api, String username, String password, Map<String, Object> payload, Class<T> resultType) {
+        return CompletableFuture.supplyAsync(() -> GSON.fromJson(getJson(api, username, password, payload), resultType));
+    }
+
+    public <T> CompletableFuture<T> call(API api, String username, String password, Map<String, Object> payload, Type resultType) {
         return CompletableFuture.supplyAsync(() -> GSON.fromJson(getJson(api, username, password, payload), resultType));
     }
 
@@ -370,36 +376,53 @@ public class SwgohAPIClient implements SwgohAPI {
         }
     }
 
-    public List<Player> getFullPlayers(List<Integer> allyCodes, Language language, SwgohAPIFilter filter) throws ExecutionException, InterruptedException {
+    public CompletableFuture<List<Player>> getFullPlayers(List<Integer> allyCodes, Language language, SwgohAPIFilter filter) {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("allycodes", allyCodes);
+        payload.put("enums", defaultEnums);
+        payload.put("language", language == null ? defaultLanguage : language.getSwgohCode());
 
-        String responseString = getPlayers(allyCodes, language, filter).get();
-
-        return Arrays.asList(GSON.fromJson(initReader(responseString), Player[].class));
+        createProjection(payload, filter);
+        return call(API.players, username, password, payload, new TypeToken<List<Player>>() {
+        }.getType());
     }
 
 
     @Override
-    public List<Guild> getFullGuild(int allyCode, Language language, SwgohAPIFilter filter) throws ExecutionException, InterruptedException {
+    public CompletableFuture<List<Guild>> getFullGuild(int allyCode, Language language, SwgohAPIFilter filter) {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("allycode", allyCode);
+        payload.put("enums", defaultEnums);
+        payload.put("language", language == null ? defaultLanguage : language.getSwgohCode());
 
-        String responseString = getGuild(allyCode, language, filter).get();
+        createProjection(payload, filter);
 
-        return Arrays.asList(GSON.fromJson(initReader(responseString), Guild[].class));
+        return call(API.guilds, username, password, payload, new TypeToken<List<Guild>>() {
+        }.getType());
     }
 
     @Override
-    public List<Guild> getFullLargeGuild(int allyCode, Language language, SwgohAPIFilter filter) throws ExecutionException, InterruptedException {
+    public CompletableFuture<List<Guild>> getFullLargeGuild(int allyCode, Language language, SwgohAPIFilter filter) {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("allycode", allyCode);
+        payload.put("enums", defaultEnums);
+        payload.put("language", language == null ? defaultLanguage : language.getSwgohCode());
 
-        String responseString = getLargeGuild(allyCode, language, filter).get();
+        createProjection(payload, filter);
 
-        return Arrays.asList(GSON.fromJson(initReader(responseString), Guild[].class));
+        return call(API.guilds, username, password, payload, new TypeToken<List<Guild>>() {
+        }.getType());
     }
 
     @Override
-    public Events getFullEvents(Language language, SwgohAPIFilter filter) throws ExecutionException, InterruptedException {
+    public CompletableFuture<Events> getFullEvents(Language language, SwgohAPIFilter filter) {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("enums", defaultEnums);
+        payload.put("language", language == null ? defaultLanguage : language.getSwgohCode());
 
-        String responseString = getEvents(language, filter).get();
+        createProjection(payload, filter);
 
-        return GSON.fromJson(initReader(responseString), Events.class);
+        return call(API.events, username, password, payload, Events.class);
     }
 
     @Override
@@ -418,7 +441,7 @@ public class SwgohAPIClient implements SwgohAPI {
     }
 
     /* Supporting methods */
-    
+
     private JsonReader initReader(String input) {
 
         JsonReader jsonReader = new JsonReader(new StringReader(input));
