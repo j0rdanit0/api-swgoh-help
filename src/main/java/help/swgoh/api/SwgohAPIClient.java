@@ -8,6 +8,7 @@ import help.swgoh.api.exception.SwgohAPIException;
 import help.swgoh.api.exception.SwgohAPINotFoundException;
 import help.swgoh.api.exception.SwgohAPIRateLimitException;
 import help.swgoh.api.exception.SwgohAPITimeoutException;
+import help.swgoh.api.models.equipment.Equipment;
 import help.swgoh.api.models.event.Events;
 import help.swgoh.api.models.guild.Guild;
 import help.swgoh.api.models.player.Player;
@@ -438,6 +439,22 @@ public class SwgohAPIClient implements SwgohAPI {
             rosters.add(player.getPlayerRoster());
         }
         return rosters;
+    }
+
+    @Override
+    public CompletableFuture<List<Equipment>> getEquipment(Map<String, Object> matchCriteria, Language language, SwgohAPIFilter filter) {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("collection", Collection.equipmentList);
+        payload.put("enums", defaultEnums);
+        payload.put("language", language == null ? defaultLanguage : language.getSwgohCode());
+
+        if (matchCriteria != null) {
+            payload.put("match", matchCriteria);
+        }
+
+        createProjection(payload, filter);
+
+        return call(API.data, username, password, payload, new TypeToken<List<Equipment>>(){}.getType());
     }
 
     /* Supporting methods */
