@@ -5,7 +5,7 @@ import java.util.Objects;
 
 public class Equipment {
 
-    private Integer id;
+    private String id;
     private String nameKey;
     private String iconKey;
     private Integer requiredLevel;
@@ -22,11 +22,11 @@ public class Equipment {
     private boolean findFlowDisabled;
     private Long updated;
 
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -153,7 +153,7 @@ public class Equipment {
     @Override
     public String toString() {
         return "Equipment{" +
-                "id=" + id +
+                "id='" + id + '\'' +
                 ", nameKey='" + nameKey + '\'' +
                 ", iconKey='" + iconKey + '\'' +
                 ", requiredLevel=" + requiredLevel +
