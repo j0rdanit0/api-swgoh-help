@@ -1,5 +1,6 @@
 package help.swgoh.api;
 
+import help.swgoh.api.models.equipment.Equipment;
 import help.swgoh.api.models.event.Events;
 import help.swgoh.api.models.guild.Guild;
 import help.swgoh.api.models.player.Player;
@@ -631,6 +632,46 @@ public interface SwgohAPI {
 
     default PlayerRoster getImprovedRoster(int allyCode) throws ExecutionException, InterruptedException {
         return getImprovedRoster(allyCode, null, SwgohAPIFilter.ALL);
+    }
+
+    /**
+     * Returns a {@code java.util.List} of {@link Equipment}s. The base call is the same as
+     * {@link SwgohAPI#getSupportData(Collection, Map, Language, SwgohAPIFilter)} with
+     * {@link SwgohAPI.Collection#equipmentList} as the {@link SwgohAPI.Collection}.
+     * <p>
+     * The match criteria should be the {@code $match}'s body, according to mongodb specifications.
+     * https://docs.mongodb.com/manual/reference/operator/aggregation/match/
+     * <p>
+     * Cache sync: on game updates
+     * <p>
+     * https://api.swgoh.help/swgoh
+     *
+     * @param matchCriteria Optionally include match criteria to filter down response.
+     * @param language      Optional language to return translated names. If no language specified, no translations will be applied.
+     * @param filter        Optional projection of response fields you want returned. If no fields are specified, all fields will be returned.
+     * @return a List of Equipment.
+     **/
+    CompletableFuture<List<Equipment>> getEquipment(Map<String, Object> matchCriteria, Language language, SwgohAPIFilter filter);
+    default CompletableFuture<List<Equipment>> getEquipment(Map<String, Object> matchCriteria, Language language){
+        return getEquipment(matchCriteria, language, SwgohAPIFilter.ALL);
+    }
+    default CompletableFuture<List<Equipment>> getEquipment(Map<String, Object> matchCriteria, SwgohAPIFilter filter){
+        return getEquipment(matchCriteria, null, filter);
+    }
+    default CompletableFuture<List<Equipment>> getEquipment(Language language, SwgohAPIFilter filter){
+        return getEquipment(null, language, filter);
+    }
+    default CompletableFuture<List<Equipment>> getEquipment(Map<String, Object> matchCriteria){
+        return getEquipment(matchCriteria, null, SwgohAPIFilter.ALL);
+    }
+    default CompletableFuture<List<Equipment>> getEquipment(Language language){
+        return getEquipment(null, language, SwgohAPIFilter.ALL);
+    }
+    default CompletableFuture<List<Equipment>> getEquipment(SwgohAPIFilter filter){
+        return getEquipment(null, null, filter);
+    }
+    default CompletableFuture<List<Equipment>> getEquipment(){
+        return getEquipment(null, null, SwgohAPIFilter.ALL);
     }
 
 
