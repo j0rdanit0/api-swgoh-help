@@ -2,6 +2,12 @@ package help.swgoh.api.models.equipment;
 
 import java.util.Objects;
 
+/**
+ * Shows the value of an {@link Equipment} when selling it.
+ *
+ * @since 4.3.1
+ * @author doenisf
+ */
 public class SellValue {
 
     private Integer currency;

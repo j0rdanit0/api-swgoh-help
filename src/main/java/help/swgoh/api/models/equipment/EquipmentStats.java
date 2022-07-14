@@ -2,6 +2,12 @@ package help.swgoh.api.models.equipment;
 
 import java.util.Arrays;
 
+/**
+ * Represents the {@link EquipmentStat}s of an {@link Equipment}.
+ *
+ * @since 4.3.1
+ * @author doenisf
+ */
 public class EquipmentStats {
 
     private EquipmentStat[] statList;

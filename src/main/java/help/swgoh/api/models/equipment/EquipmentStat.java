@@ -5,6 +5,12 @@ import help.swgoh.api.models.enums.UnitStat;
 import java.math.BigDecimal;
 import java.util.Objects;
 
+/**
+ * Represents a stat of an {@link Equipment} piece.
+ *
+ * @since 4.3.1
+ * @author doenisf
+ */
 public class EquipmentStat {
 
     private UnitStat unitStatId;

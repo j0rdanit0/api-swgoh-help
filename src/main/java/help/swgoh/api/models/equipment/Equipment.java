@@ -3,6 +3,13 @@ package help.swgoh.api.models.equipment;
 import java.util.Arrays;
 import java.util.Objects;
 
+/**
+ * Represents a single gear piece that is returned when calling the /data endpoint with the
+ * {@link help.swgoh.api.SwgohAPI.Collection#equipmentList} as the collection.
+ *
+ * @since 4.3.1
+ * @author doenisf
+ */
 public class Equipment {
 
     private String id;

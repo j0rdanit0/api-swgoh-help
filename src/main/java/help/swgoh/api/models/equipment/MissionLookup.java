@@ -2,6 +2,12 @@ package help.swgoh.api.models.equipment;
 
 import java.util.Objects;
 
+/**
+ * Represents a mission where a piece of gear can be obtained from.
+ *
+ * @since 4.3.1
+ * @author doenisf
+ */
 public class MissionLookup {
 
     private MissionIdentifier missionIdentifier;

@@ -2,6 +2,14 @@ package help.swgoh.api.models.equipment;
 
 import java.util.Objects;
 
+/**
+ * Used to identify a mission.
+ * </p>
+ * Often used in a {@link MissionLookup} list all the missions where a piece of {@link Equipment} can be obtained.
+ *
+ * @since 4.3.1
+ * @author doenisf
+ */
 public class MissionIdentifier {
 
     private String campaignId;
