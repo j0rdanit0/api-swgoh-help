@@ -89,19 +89,20 @@ From version 4.3.1 onwards, there are model classes and new methods to get the r
 // Example to get a list of players
 int allyCode1 = 123456789;
 int allyCode2 = 987654321;
-List<Player> players = api.getFullPlayers(Arrays.asList(allyCode1, allyCode2)).get();
+List<Player> players = api.getPlayerObjects(Arrays.asList(allyCode1, allyCode2)).get();
 ```
 ```java
 // Example to get a player
 int allyCode = 123456789;
 // Due to the way the API works, the request to retrieve only one player also returns an array of
 // players that only contains one player.        
-Player players = api.getFullPlayer(allyCode).get().get(0);
+Player players = api.getPlayerObject(allyCode).get().get(0);
 ```
 ```java
 // Example to get a guild
-Guild guild = api.getFullGuild(123456789).get();
+Guild guild = api.getGuildObject(123456789).get();
 ```
+
 ...and so much more! Please reference `SwgohAPI.Collection` for a list of all available data collections.
 
 # Global Discord Registry
