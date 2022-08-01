@@ -593,8 +593,8 @@ public interface SwgohAPI {
     }
 
     /**
-     * An improved version of the {@link #getRosters(List, Language, SwgohAPIFilter)} method, which instead of a raw JSON as a
-     * {@code java.lang.String} responds with an {@link List} of {@link PlayerRoster}s.
+     * A helper method to get the {@link PlayerRoster} via the <a href="https://api.swgoh.help/swgoh/players/{id}">/player</a> endpoint rather than the
+     * <a href="https://api.swgoh.help/swgoh/roster/{id}">/roster</a> endpoint. This method returns the same result as {@code api.getPlaayerObject().get().getRoster()}.
      * <p>
      * Cache sync:
      * Registered user: 4 hours
@@ -608,30 +608,30 @@ public interface SwgohAPI {
      * @param filter    Optional projection of response fields you want returned. If no fields are specified, all fields will be returned.
      * @return an object representation of the players rosters
      */
-    List<PlayerRoster> getImprovedRosters(List<Integer> allyCodes, Language language, SwgohAPIFilter filter) throws ExecutionException, InterruptedException;
+    List<PlayerRoster> getPlayerRosterObjects(List<Integer> allyCodes, Language language, SwgohAPIFilter filter) throws ExecutionException, InterruptedException;
 
-    default List<PlayerRoster> getImprovedRosters(List<Integer> allyCodes, Language language) throws ExecutionException, InterruptedException {
-        return getImprovedRosters(allyCodes, language, SwgohAPIFilter.ALL);
+    default List<PlayerRoster> getPlayerRosterObjects(List<Integer> allyCodes, Language language) throws ExecutionException, InterruptedException {
+        return getPlayerRosterObjects(allyCodes, language, SwgohAPIFilter.ALL);
     }
 
-    default List<PlayerRoster> getImprovedRosters(List<Integer> allyCodes) throws ExecutionException, InterruptedException {
-        return getImprovedRosters(allyCodes, null, SwgohAPIFilter.ALL);
+    default List<PlayerRoster> getPlayerRosterObjects(List<Integer> allyCodes) throws ExecutionException, InterruptedException {
+        return getPlayerRosterObjects(allyCodes, null, SwgohAPIFilter.ALL);
     }
 
-    default PlayerRoster getImprovedRoster(int allyCode, Language language, SwgohAPIFilter filter) throws ExecutionException, InterruptedException {
-        return getImprovedRosters(Arrays.asList(allyCode), language, filter).get(0);
+    default PlayerRoster getPlayerRosterObject(int allyCode, Language language, SwgohAPIFilter filter) throws ExecutionException, InterruptedException {
+        return getPlayerRosterObjects(Arrays.asList(allyCode), language, filter).get(0);
     }
 
-    default PlayerRoster getImprovedRoster(int allyCode, Language language) throws ExecutionException, InterruptedException {
-        return getImprovedRoster(allyCode, language, SwgohAPIFilter.ALL);
+    default PlayerRoster getPlayerRosterObject(int allyCode, Language language) throws ExecutionException, InterruptedException {
+        return getPlayerRosterObject(allyCode, language, SwgohAPIFilter.ALL);
     }
 
-    default PlayerRoster getImprovedRoster(int allyCode, SwgohAPIFilter filter) throws ExecutionException, InterruptedException {
-        return getImprovedRoster(allyCode, null, filter);
+    default PlayerRoster getPlayerRosterObject(int allyCode, SwgohAPIFilter filter) throws ExecutionException, InterruptedException {
+        return getPlayerRosterObject(allyCode, null, filter);
     }
 
-    default PlayerRoster getImprovedRoster(int allyCode) throws ExecutionException, InterruptedException {
-        return getImprovedRoster(allyCode, null, SwgohAPIFilter.ALL);
+    default PlayerRoster getPlayerRosterObject(int allyCode) throws ExecutionException, InterruptedException {
+        return getPlayerRosterObject(allyCode, null, SwgohAPIFilter.ALL);
     }
 
     /**

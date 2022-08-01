@@ -427,7 +427,7 @@ public class SwgohAPIClient implements SwgohAPI {
     }
 
     @Override
-    public List<PlayerRoster> getImprovedRosters(List<Integer> allyCodes, Language language, SwgohAPIFilter filter) throws ExecutionException, InterruptedException {
+    public List<PlayerRoster> getPlayerRosterObjects(List<Integer> allyCodes, Language language, SwgohAPIFilter filter) throws ExecutionException, InterruptedException {
         filter.and("roster");
 
         String responseString = getPlayers(allyCodes, language, filter).get();
