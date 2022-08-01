@@ -377,7 +377,7 @@ public class SwgohAPIClient implements SwgohAPI {
         }
     }
 
-    public CompletableFuture<List<Player>> getFullPlayers(List<Integer> allyCodes, Language language, SwgohAPIFilter filter) {
+    public CompletableFuture<List<Player>> getPlayerObjects(List<Integer> allyCodes, Language language, SwgohAPIFilter filter) {
         Map<String, Object> payload = new HashMap<>();
         payload.put("allycodes", allyCodes);
         payload.put("enums", defaultEnums);
@@ -390,7 +390,7 @@ public class SwgohAPIClient implements SwgohAPI {
 
 
     @Override
-    public CompletableFuture<List<Guild>> getFullGuild(int allyCode, Language language, SwgohAPIFilter filter) {
+    public CompletableFuture<List<Guild>> getGuildObject(int allyCode, Language language, SwgohAPIFilter filter) {
         Map<String, Object> payload = new HashMap<>();
         payload.put("allycode", allyCode);
         payload.put("enums", defaultEnums);
@@ -403,7 +403,7 @@ public class SwgohAPIClient implements SwgohAPI {
     }
 
     @Override
-    public CompletableFuture<List<Guild>> getFullLargeGuild(int allyCode, Language language, SwgohAPIFilter filter) {
+    public CompletableFuture<List<Guild>> getLargeGuildObject(int allyCode, Language language, SwgohAPIFilter filter) {
         Map<String, Object> payload = new HashMap<>();
         payload.put("allycode", allyCode);
         payload.put("enums", defaultEnums);
@@ -416,7 +416,7 @@ public class SwgohAPIClient implements SwgohAPI {
     }
 
     @Override
-    public CompletableFuture<Events> getFullEvents(Language language, SwgohAPIFilter filter) {
+    public CompletableFuture<Events> getEventsObject(Language language, SwgohAPIFilter filter) {
         Map<String, Object> payload = new HashMap<>();
         payload.put("enums", defaultEnums);
         payload.put("language", language == null ? defaultLanguage : language.getSwgohCode());
